@@ -87,6 +87,6 @@ export function enterCockpitWithTracking({
 
   return {
     entered,
-    error: entered ? null : entryError?.message || 'Cockpit entry was unavailable',
+    error: entered ? null : entryError?.message || 'Entrée dans le cockpit indisponible',
   };
 }

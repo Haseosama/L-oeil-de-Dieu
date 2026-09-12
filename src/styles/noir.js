@@ -5,7 +5,7 @@
 export const noirShader = {
   name: 'noir',
   uniforms: {
-    contrastAmt: { default: 1.2, min: 0, max: 2, label: 'Contrast' },
+    contrastAmt: { default: 1.2, min: 0, max: 2, label: 'Contraste' },
     grainAmt: { default: 0.5, min: 0, max: 1, label: 'Grain' },
     vignetteAmt: { default: 0.5, min: 0, max: 1, label: 'Vignette' },
   },

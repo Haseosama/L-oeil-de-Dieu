@@ -267,9 +267,9 @@ export function createLocalInfrastructureOverlayPublisher({
  * @returns {string} Short reason for getStats().error.
  */
 export function localDatasetError(error) {
-  if (error?.name === 'SyntaxError') return 'dataset is malformed';
+  if (error?.name === 'SyntaxError') return 'jeu de données corrompu';
   const message = String(error?.message || '').trim();
-  return message ? `dataset unavailable (${message})` : 'dataset unavailable';
+  return message ? `jeu de données indisponible (${message})` : 'jeu de données indisponible';
 }
 
 /**
@@ -886,7 +886,7 @@ function clampCardLine(value) {
 }
 
 function layerTitle(layerId) {
-  if (layerId === 'local-datacenters') return 'Datacenter';
-  if (layerId === 'local-dams') return 'Dam';
-  return 'Feature';
+  if (layerId === 'local-datacenters') return 'Centre de données';
+  if (layerId === 'local-dams') return 'Barrage';
+  return 'Élément';
 }

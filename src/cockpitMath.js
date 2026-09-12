@@ -76,7 +76,7 @@ export function formatCockpitContextScope(subjectLabel, radiusM, installationCov
   const coverage = typeof installationCoverage === 'string'
     ? installationCoverage.trim()
     : '';
-  const base = `${normalizedLabel} · ${radiusKm} KM AIR/SEA WINDOW`;
+  const base = `${normalizedLabel} · ${radiusKm} KM FENÊTRE AIR/MER`;
   return coverage
     ? `${base} · INSTALLATIONS ${coverage}`
     : base;
@@ -93,7 +93,7 @@ export function formatCompassDivision(heading) {
   const normalized = normalizeHeading(heading);
   const labels = new Map([
     [0, 'N'], [45, 'NE'], [90, 'E'], [135, 'SE'],
-    [180, 'S'], [225, 'SW'], [270, 'W'], [315, 'NW'],
+    [180, 'S'], [225, 'SO'], [270, 'O'], [315, 'NO'],
   ]);
   return labels.get(normalized) || String(Math.round(normalized)).padStart(3, '0');
 }

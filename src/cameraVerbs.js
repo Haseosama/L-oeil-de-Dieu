@@ -1011,31 +1011,31 @@ export function moveCamera(args = {}, runNavigation = null) {
     return typeof runNavigation === 'function' ? runNavigation(stop) : stop();
   }
   if (!['orbit', 'pan', 'tilt', 'rotate'].includes(motion)) {
-    return { ok: false, action: 'move_camera', error: `Unknown motion "${args.motion}" — use orbit, pan, tilt, rotate, or stop.` };
+    return { ok: false, action: 'move_camera', error: `Mouvement inconnu « ${args.motion} » — utilisez orbit, pan, tilt, rotate ou stop.` };
   }
   if (motion !== 'orbit' && !['left', 'right', 'up', 'down'].includes(direction)) {
-    return { ok: false, action: 'move_camera', error: `${motion} needs a direction (left/right${motion !== 'rotate' ? '/up/down' : ''}).` };
+    return { ok: false, action: 'move_camera', error: `${motion} nécessite une direction (left/right${motion !== 'rotate' ? '/up/down' : ''}).` };
   }
   if ((motion === 'rotate') && !['left', 'right'].includes(direction)) {
-    return { ok: false, action: 'move_camera', error: 'rotate needs left or right.' };
+    return { ok: false, action: 'move_camera', error: 'rotate nécessite left ou right.' };
   }
   if (motion === 'tilt') {
     // Honest limits: at the clamp a tilt is a no-op — say so instead of
     // reporting success and letting the model gaslight itself (field test).
     const pitch = _viewer.camera.pitch;
     if (direction === 'up' && pitch >= PITCH_MAX - Cesium.Math.toRadians(0.5)) {
-      return { ok: false, action: 'move_camera', error: 'Already at the upper tilt limit (near the horizon) — tilt down, or zoom/pan instead.' };
+      return { ok: false, action: 'move_camera', error: 'Déjà à la limite supérieure d\'inclinaison (près de l\'horizon) — inclinez vers le bas, ou zoomez/déplacez à la place.' };
     }
     if (direction === 'down' && pitch <= PITCH_MIN + Cesium.Math.toRadians(0.5)) {
-      return { ok: false, action: 'move_camera', error: 'Already looking straight down — tilt up to raise the horizon.' };
+      return { ok: false, action: 'move_camera', error: 'Déjà à la verticale vers le bas — inclinez vers le haut pour relever l\'horizon.' };
     }
   }
   if (motion === 'orbit' && _viewer?.trackedEntity && typeof runNavigation !== 'function') {
     // The follow camera owns a tracked view; a lookAt orbit fights it frame
     // by frame and stop rips the camera out (field finding). Honest refusal
     // until tracked-orbit rides the follow camera natively (roadmap).
-    const label = _viewer.trackedEntity?.name || _viewer.trackedEntity?.id || 'the tracked target';
-    return { ok: false, action: 'move_camera', error: `Already following ${label} — the follow camera owns the view while tracking. Say "stop tracking" first if you want a free orbit.` };
+    const label = _viewer.trackedEntity?.name || _viewer.trackedEntity?.id || 'la cible suivie';
+    return { ok: false, action: 'move_camera', error: `Suit déjà ${label} — la caméra de suivi contrôle la vue pendant le suivi. Dites d'abord « stop tracking » si vous voulez une orbite libre.` };
   }
   const start = () => {
     interruptCameraMotion('replaced');
@@ -1108,14 +1108,14 @@ export function flyRoute(annoList, args = {}, floorFn = null, runNavigation = nu
   const speed = ROUTE_M_S[String(args.speed || 'normal').toLowerCase()] ? String(args.speed || 'normal').toLowerCase() : 'normal';
   const routes = (annoList || []).filter((a) => a.type === 'route' && Array.isArray(a.path) && a.path.length >= 2);
   if (!routes.length) {
-    return { ok: false, action: 'fly_route', error: 'No route is drawn — draw a route first (e.g. "route from A to B"), then fly it.' };
+    return { ok: false, action: 'fly_route', error: 'Aucun itinéraire n\'est tracé — tracez d\'abord un itinéraire (ex. « itinéraire de A à B »), puis parcourez-le.' };
   }
   let route = routes[routes.length - 1];
   if (args.label) {
     const wanted = String(args.label).toLowerCase();
     const byLabel = routes.filter((a) => String(a.label || '').toLowerCase().includes(wanted));
     if (!byLabel.length) {
-      return { ok: false, action: 'fly_route', error: `No route matches "${args.label}" — say fly the route without a name for the newest one.` };
+      return { ok: false, action: 'fly_route', error: `Aucun itinéraire ne correspond à « ${args.label} » — dites de parcourir l'itinéraire sans nom pour le plus récent.` };
     }
     route = byLabel[byLabel.length - 1];
   }
@@ -1124,7 +1124,7 @@ export function flyRoute(annoList, args = {}, floorFn = null, runNavigation = nu
     || !Number.isFinite(point?.lon)
     || point.lon < -180 || point.lon > 180
     || (point.height !== undefined && !Number.isFinite(point.height)))) {
-    return { ok: false, action: 'fly_route', error: 'The selected route has an invalid waypoint.' };
+    return { ok: false, action: 'fly_route', error: 'L\'itinéraire sélectionné contient un point de passage invalide.' };
   }
   const pts = route.path.map((p) => Cesium.Cartesian3.fromDegrees(p.lon, p.lat, (p.height || 0)));
   const cumM = [0];
@@ -1132,7 +1132,7 @@ export function flyRoute(annoList, args = {}, floorFn = null, runNavigation = nu
     cumM.push(cumM[i - 1] + Cesium.Cartesian3.distance(pts[i - 1], pts[i]));
   }
   if (!Number.isFinite(cumM.at(-1)) || cumM.at(-1) <= 0) {
-    return { ok: false, action: 'fly_route', error: 'The selected route has no flyable distance.' };
+    return { ok: false, action: 'fly_route', error: 'L\'itinéraire sélectionné n\'a aucune distance parcourable.' };
   }
   const start = () => {
     interruptCameraMotion('replaced');

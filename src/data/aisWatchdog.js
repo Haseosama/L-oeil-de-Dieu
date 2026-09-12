@@ -244,7 +244,7 @@ export function createAisWatchdog(options = {}) {
     if (env.hasTransport === false) {
       const actions = terminateOwned('no-transport');
       status = 'unsupported';
-      error = 'Node WebSocket transport is unavailable';
+      error = 'Le transport WebSocket Node est indisponible';
       return actions;
     }
 
@@ -470,9 +470,9 @@ export function createAisWatchdog(options = {}) {
 }
 
 function defaultFailureMessage(kind) {
-  if (kind === 'auth') return 'AISStream rejected the API key';
-  if (kind === 'rate-limit') return 'AISStream rate-limited this key';
-  return 'AISStream websocket error';
+  if (kind === 'auth') return 'AISStream a rejeté la clé API';
+  if (kind === 'rate-limit') return 'AISStream a limité le débit de cette clé';
+  return 'Erreur websocket AISStream';
 }
 
 function positiveOr(value, fallback) {

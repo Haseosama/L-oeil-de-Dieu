@@ -18,7 +18,7 @@ export const KEY_SETUP_VALUE_LIMIT = 512;
 export const KEY_SETUP_UPDATE_LIMIT = 16;
 
 /** Header line written above keys the panel appends to a .env file. */
-export const KEY_SETUP_APPEND_HEADER = '# Keys added by the in-app POWER UP panel';
+export const KEY_SETUP_APPEND_HEADER = '# Clés ajoutées depuis le panneau ACTIVER de l\'application';
 
 /**
  * Every key the panel offers, in the order it offers them — most magic per
@@ -31,7 +31,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'google-maps',
     title: 'GOOGLE MAPS',
-    unlocks: 'The photorealistic 3D planet + place search',
+    unlocks: 'La planète 3D photoréaliste + recherche de lieux',
     getUrl: 'https://developers.google.com/maps/documentation/tile/get-api-key',
     envVars: Object.freeze(['GOOGLE_MAPS_API_KEY']),
     tier: 'metered',
@@ -40,7 +40,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'openai',
     title: 'OPENAI',
-    unlocks: 'Voice control — talk to the planet',
+    unlocks: 'Contrôle vocal — parlez à la planète',
     getUrl: 'https://platform.openai.com/api-keys',
     envVars: Object.freeze(['OPENAI_API_KEY']),
     tier: 'metered',
@@ -48,7 +48,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'aisstream',
     title: 'AISSTREAM',
-    unlocks: 'Live ships, worldwide',
+    unlocks: 'Navires en direct, dans le monde entier',
     getUrl: 'https://aisstream.io',
     envVars: Object.freeze(['AISSTREAM_API_KEY']),
     tier: 'free',
@@ -56,7 +56,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'firms',
     title: 'NASA FIRMS',
-    unlocks: 'Live active-fire detections',
+    unlocks: 'Détections d\'incendies actifs en direct',
     getUrl: 'https://firms.modaps.eosdis.nasa.gov/api/map_key/',
     envVars: Object.freeze(['FIRMS_MAP_KEY']),
     tier: 'free',
@@ -64,7 +64,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'tomtom',
     title: 'TOMTOM',
-    unlocks: 'Real live traffic (keyless runs a simulation)',
+    unlocks: 'Vrai trafic en direct (sans clé, une simulation tourne)',
     getUrl: 'https://developer.tomtom.com',
     envVars: Object.freeze(['TOMTOM_API_KEY']),
     tier: 'free',
@@ -72,7 +72,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'cesium-ion',
     title: 'CESIUM ION',
-    unlocks: 'Bing imagery map stacks + world terrain',
+    unlocks: 'Fonds cartographiques Bing + relief mondial',
     getUrl: 'https://ion.cesium.com/tokens',
     envVars: Object.freeze(['CESIUM_ION_TOKEN']),
     tier: 'free',
@@ -81,7 +81,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'opensky',
     title: 'OPENSKY',
-    unlocks: 'More flight-polling credits (anonymous works without)',
+    unlocks: 'Plus de crédits d\'interrogation des vols (fonctionne aussi en anonyme)',
     getUrl: 'https://opensky-network.org',
     envVars: Object.freeze(['OPENSKY_CLIENT_ID', 'OPENSKY_CLIENT_SECRET']),
     tier: 'free',
@@ -89,7 +89,7 @@ export const KEY_SETUP_KEYS = Object.freeze([
   Object.freeze({
     id: 'launch-library',
     title: 'LAUNCH LIBRARY',
-    unlocks: 'Higher space-missions request allowance',
+    unlocks: 'Quota de requêtes missions spatiales plus élevé',
     getUrl: 'https://thespacedevs.com',
     envVars: Object.freeze(['LL2_API_TOKEN']),
     tier: 'free',
@@ -202,7 +202,7 @@ export function admitKeySetupRequest({
   // only appear when someone has deliberately fronted the dev server.
   const PROXY_SIGNALS = ['forwarded', 'via', 'x-forwarded-for', 'x-forwarded-host', 'x-forwarded-port', 'x-forwarded-proto', 'x-real-ip', 'cf-connecting-ip', 'cf-ray'];
   if (PROXY_SIGNALS.some((name) => String(proxyHeaders[name] || '').trim() !== '')) {
-    return { ok: false, status: 403, error: 'Provider Settings does not answer proxied requests' };
+    return { ok: false, status: 403, error: 'Les Paramètres fournisseurs ne répondent pas aux requêtes proxifiées' };
   }
   // Every sharing signal the launcher recognizes (scripts/pinokio-preflight.mjs)
   // also disables this surface — so the gate's set is complete, not a subset the
@@ -219,24 +219,24 @@ export function admitKeySetupRequest({
     .some((name) => /^(1|true)$/i.test(String(env[name] || '').trim()))
     || (shareVar !== '' && shareVar !== '__gev_sharing_disabled__');
   if (sharingEnabled) {
-    return { ok: false, status: 403, error: 'Provider Settings is disabled while sharing is enabled' };
+    return { ok: false, status: 403, error: 'Les Paramètres fournisseurs sont désactivés tant que le partage est activé' };
   }
   if (!LOOPBACK_ADDRESSES.has(String(remoteAddress || ''))) {
-    return { ok: false, status: 403, error: 'Provider Settings answers only the machine running the server' };
+    return { ok: false, status: 403, error: 'Les Paramètres fournisseurs ne répondent qu\'à la machine qui héberge le serveur' };
   }
   const authority = localAuthority(hostHeader, protocol);
   if (!authority) {
-    return { ok: false, status: 403, error: 'Provider Settings answers only local hostnames' };
+    return { ok: false, status: 403, error: 'Les Paramètres fournisseurs ne répondent qu\'aux noms d\'hôte locaux' };
   }
   if (method === 'POST' && (origin === undefined || origin === null || origin === '')) {
-    return { ok: false, status: 403, error: 'Provider Settings requires an exact local Origin' };
+    return { ok: false, status: 403, error: 'Les Paramètres fournisseurs exigent une Origin locale exacte' };
   }
   if (origin !== undefined && origin !== null && origin !== '') {
     let parsedOrigin;
     try {
       parsedOrigin = new URL(String(origin));
     } catch {
-      return { ok: false, status: 403, error: 'Unrecognized Origin refused' };
+      return { ok: false, status: 403, error: 'Origin non reconnue, refusée' };
     }
     const exactOrigin = parsedOrigin.username === ''
       && parsedOrigin.password === ''
@@ -245,11 +245,11 @@ export function admitKeySetupRequest({
       && parsedOrigin.hash === ''
       && parsedOrigin.origin === authority;
     if (!exactOrigin) {
-      return { ok: false, status: 403, error: 'Cross-origin requests are refused' };
+      return { ok: false, status: 403, error: 'Les requêtes cross-origin sont refusées' };
     }
   }
   if (method === 'POST' && !String(contentType || '').toLowerCase().startsWith('application/json')) {
-    return { ok: false, status: 415, error: 'Content-Type must be application/json' };
+    return { ok: false, status: 415, error: 'Le Content-Type doit être application/json' };
   }
   return { ok: true };
 }
@@ -267,7 +267,7 @@ export function knownKeySetupEnvVars() {
 export function keySetupRequirement(id) {
   const entry = KEY_SETUP_KEYS.find((candidate) => candidate.id === id);
   if (!entry) return '';
-  return `Needs ${entry.envVars.join(' + ')} — add it in Provider Settings`;
+  return `Nécessite ${entry.envVars.join(' + ')} — à ajouter dans les Paramètres fournisseurs`;
 }
 
 /**
@@ -327,29 +327,29 @@ export function keySetupStatus(env = {}) {
  */
 export function validateKeySetupUpdates(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
-    return { ok: false, error: 'Body must be a JSON object of {ENV_VAR: value}' };
+    return { ok: false, error: 'Le corps doit être un objet JSON de la forme {VARIABLE_ENV: valeur}' };
   }
   const entries = Object.entries(body);
-  if (entries.length === 0) return { ok: false, error: 'No keys provided' };
+  if (entries.length === 0) return { ok: false, error: 'Aucune clé fournie' };
   if (entries.length > KEY_SETUP_UPDATE_LIMIT) {
-    return { ok: false, error: `At most ${KEY_SETUP_UPDATE_LIMIT} keys per save` };
+    return { ok: false, error: `${KEY_SETUP_UPDATE_LIMIT} clés maximum par enregistrement` };
   }
   const known = knownKeySetupEnvVars();
   const updates = {};
   for (const [name, raw] of entries) {
-    if (!known.has(name)) return { ok: false, error: `Unknown key: ${name}` };
+    if (!known.has(name)) return { ok: false, error: `Clé inconnue : ${name}` };
     if (raw === null) {
       updates[name] = null;
       continue;
     }
-    if (typeof raw !== 'string') return { ok: false, error: `${name} must be a string` };
+    if (typeof raw !== 'string') return { ok: false, error: `${name} doit être une chaîne de caractères` };
     const value = raw.trim();
-    if (!value) return { ok: false, error: `${name} is empty` };
+    if (!value) return { ok: false, error: `${name} est vide` };
     if (value.length > KEY_SETUP_VALUE_LIMIT) {
-      return { ok: false, error: `${name} is longer than any real key (${KEY_SETUP_VALUE_LIMIT} max)` };
+      return { ok: false, error: `${name} est plus longue qu'une vraie clé (${KEY_SETUP_VALUE_LIMIT} max)` };
     }
     if (!/^[\x21-\x7e]+$/.test(value)) {
-      return { ok: false, error: `${name} may only contain printable characters with no spaces` };
+      return { ok: false, error: `${name} ne peut contenir que des caractères imprimables, sans espace` };
     }
     // Reject the dotenv metacharacters that would round-trip WRONG when written
     // unquoted (# starts a comment, quotes redelimit, $ expands, backslash and
@@ -357,7 +357,7 @@ export function validateKeySetupUpdates(body) {
     // parseEnv and Vite's expansion read back. Real provider keys never contain
     // these; they are base64url / hex / JWT alphabets.
     if (/[#"'$\\`]/.test(value)) {
-      return { ok: false, error: `${name} contains a character that is not valid in a key (#, quotes, $, \\, or backtick)` };
+      return { ok: false, error: `${name} contient un caractère invalide pour une clé (#, guillemets, $, \\, ou backtick)` };
     }
     updates[name] = value;
   }

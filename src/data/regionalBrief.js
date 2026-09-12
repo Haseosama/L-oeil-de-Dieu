@@ -93,18 +93,18 @@ export function normalizeRegionalWeather(payload) {
 /** Translate the WMO weather code used by Open-Meteo into concise cockpit copy. */
 export function weatherCodeLabel(code) {
   const value = Number(code);
-  if (!Number.isFinite(value)) return 'CONDITIONS UNKNOWN';
-  if (value === 0) return 'CLEAR';
-  if ([1, 2].includes(value)) return 'PARTLY CLOUDY';
-  if (value === 3) return 'OVERCAST';
-  if ([45, 48].includes(value)) return 'FOG';
-  if (value >= 51 && value <= 57) return 'DRIZZLE';
-  if (value >= 61 && value <= 67) return 'RAIN';
-  if (value >= 71 && value <= 77) return 'SNOW';
-  if (value >= 80 && value <= 82) return 'RAIN SHOWERS';
-  if (value >= 85 && value <= 86) return 'SNOW SHOWERS';
-  if (value >= 95) return 'THUNDERSTORM';
-  return 'MIXED CONDITIONS';
+  if (!Number.isFinite(value)) return 'CONDITIONS INCONNUES';
+  if (value === 0) return 'CIEL DÉGAGÉ';
+  if ([1, 2].includes(value)) return 'PARTIELLEMENT NUAGEUX';
+  if (value === 3) return 'COUVERT';
+  if ([45, 48].includes(value)) return 'BROUILLARD';
+  if (value >= 51 && value <= 57) return 'BRUINE';
+  if (value >= 61 && value <= 67) return 'PLUIE';
+  if (value >= 71 && value <= 77) return 'NEIGE';
+  if (value >= 80 && value <= 82) return 'AVERSES DE PLUIE';
+  if (value >= 85 && value <= 86) return 'AVERSES DE NEIGE';
+  if (value >= 95) return 'ORAGE';
+  return 'CONDITIONS MIXTES';
 }
 
 /** Great-circle distance used to avoid refetching a regional brief every animation frame. */

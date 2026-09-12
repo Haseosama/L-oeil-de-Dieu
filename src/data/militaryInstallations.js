@@ -430,7 +430,7 @@ async function loadInstallations() {
     state.abort = null;
     state.loading = false;
     clearUnavailableRetry();
-    setInstallationStatus('zoom-in', 'Zoom in to load mapped installation context');
+    setInstallationStatus('zoom-in', 'Zoomez pour charger le contexte des installations cartographiées');
     return;
   }
   state.abort?.abort();
@@ -503,7 +503,7 @@ async function loadInstallations() {
         }
       } catch (error) {
         if (error?.name === 'AbortError') return;
-        placesError = 'Google Places search unavailable; showing mapped sites';
+        placesError = 'Recherche Google Places indisponible ; affichage des sites cartographiés';
       }
     }
     await resolveGroundFloorCellsBounded(records.map((record) => ({
@@ -523,15 +523,15 @@ async function loadInstallations() {
     setInstallationStatus(
       state.records.length ? (state.stale ? 'stale' : 'ready') : 'empty',
       payload.status === 'stale'
-        ? 'Serving cached mapped context'
-        : (saturated ? 'Too many mapped sites in view to list them all' : placesError),
+        ? 'Contexte cartographié en cache'
+        : (saturated ? 'Trop de sites cartographiés dans la vue pour tous les lister' : placesError),
     );
     renderRecords();
     warmInstallationFloors(state.records);
   } catch (error) {
     if (error?.name === 'AbortError') return;
     state.failureReason = error?.failureReason || 'unavailable';
-    setInstallationStatus('unavailable', error?.message || 'Installation context unavailable');
+    setInstallationStatus('unavailable', error?.message || 'Contexte des installations indisponible');
     scheduleUnavailableRetry();
   } finally {
     // An older aborted request must not clear a newer request's busy state.
@@ -544,7 +544,7 @@ async function loadInstallations() {
 
 const militaryInstallationsLayer = {
   id: LAYER_ID,
-  name: 'Mapped Installations',
+  name: 'Installations cartographiées',
   icon: '⌖',
   source: 'OpenStreetMap + optional Google Maps Places',
   updateInterval: 0,

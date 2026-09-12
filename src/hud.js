@@ -158,8 +158,8 @@ export class IntelHUD {
           <div class="hud-system">${this._missionId}  ${this._sensorId}</div>
           <div class="hud-mode" id="hud-mode">NORMAL</div>
           <div class="hud-summary-wrap">
-            <div class="hud-summary-label">SUMMARY</div>
-            <div class="hud-summary" id="hud-summary">Awaiting telemetry...</div>
+            <div class="hud-summary-label">RÉSUMÉ</div>
+            <div class="hud-summary" id="hud-summary">En attente de télémétrie...</div>
           </div>
         </div>
       </div>
@@ -469,11 +469,11 @@ export class IntelHUD {
    * @returns {'STREET'|'CITY'|'METRO'|'REGIONAL'|'GLOBAL'} Band label.
    */
   _viewBand(altM) {
-    if (altM < 1200) return 'STREET';
-    if (altM < 5000) return 'CITY';
-    if (altM < 30000) return 'METRO';
-    if (altM < 250000) return 'REGIONAL';
-    return 'GLOBAL';
+    if (altM < 1200) return 'RUE';
+    if (altM < 5000) return 'VILLE';
+    if (altM < 30000) return 'MÉTRO';
+    if (altM < 250000) return 'RÉGIONAL';
+    return 'MONDIAL';
   }
 
   /**
@@ -483,15 +483,15 @@ export class IntelHUD {
    * @returns {string} Region name (e.g. `"EUROPE"`, `"NORTHERN OCEANIC GRID"`).
    */
   _regionLabel(lat, lon) {
-    if (lat > 72) return 'ARCTIC';
-    if (lat < -60) return 'ANTARCTIC';
-    if (lat >= 5 && lat <= 83 && lon >= -170 && lon <= -50) return 'NORTH AMERICA';
-    if (lat >= -60 && lat <= 15 && lon >= -90 && lon <= -30) return 'SOUTH AMERICA';
+    if (lat > 72) return 'ARCTIQUE';
+    if (lat < -60) return 'ANTARCTIQUE';
+    if (lat >= 5 && lat <= 83 && lon >= -170 && lon <= -50) return 'AMÉRIQUE DU NORD';
+    if (lat >= -60 && lat <= 15 && lon >= -90 && lon <= -30) return 'AMÉRIQUE DU SUD';
     if (lat >= 34 && lat <= 72 && lon >= -25 && lon <= 45) return 'EUROPE';
-    if (lat >= -35 && lat <= 38 && lon >= -20 && lon <= 55) return 'AFRICA';
-    if (lat >= 5 && lat <= 80 && lon >= 45 && lon <= 180) return 'ASIA';
-    if (lat >= -50 && lat <= 5 && lon >= 110 && lon <= 180) return 'OCEANIA';
-    return lat >= 0 ? 'NORTHERN OCEANIC GRID' : 'SOUTHERN OCEANIC GRID';
+    if (lat >= -35 && lat <= 38 && lon >= -20 && lon <= 55) return 'AFRIQUE';
+    if (lat >= 5 && lat <= 80 && lon >= 45 && lon <= 180) return 'ASIE';
+    if (lat >= -50 && lat <= 5 && lon >= 110 && lon <= 180) return 'OCÉANIE';
+    return lat >= 0 ? 'GRILLE OCÉANIQUE NORD' : 'GRILLE OCÉANIQUE SUD';
   }
 
   /**
@@ -564,7 +564,7 @@ export class IntelHUD {
    */
   _composeSummary() {
     const m = this._latestMetrics;
-    if (!m) return 'Awaiting telemetry...';
+    if (!m) return 'En attente de télémétrie...';
 
     const modeEl = document.getElementById('hud-mode');
     const modeLabel = modeEl?.textContent || 'NORMAL';

@@ -9,6 +9,23 @@
 
 export const NAVIGATION_AUTHORITY_EVENT = 'gev:navigation-authority-taken';
 
+/** French phrasing (with article) for the diagnostic `noun` tags used in cockpit-exit toasts. */
+const NAV_NOUN_FR = {
+  location: 'un lieu',
+  target: 'une cible',
+  camera: 'une caméra',
+  'shared view': 'une vue partagée',
+  aircraft: 'un aéronef',
+  vessel: 'un navire',
+  satellite: 'un satellite',
+  fire: 'un feu',
+  view: 'une vue',
+};
+
+function navNounFr(noun) {
+  return NAV_NOUN_FR[noun] || `« ${noun} »`;
+}
+
 /**
  * Announce that a layer-owned camera flight is taking navigation authority.
  *
@@ -84,7 +101,7 @@ export function runExplicitNavigation({
 } = {}) {
   if (disposed) return false;
   if (cockpitActive) {
-    showToast?.(`Exit cockpit to fly to a ${noun}`);
+    showToast?.(`Quittez le cockpit pour rejoindre ${navNounFr(noun)}`);
     return false;
   }
   const generation = stamp?.();
@@ -106,7 +123,7 @@ export function beginDeferredNavigation({
 } = {}) {
   if (disposed) return false;
   if (cockpitActive) {
-    showToast?.(`Exit cockpit to fly to a ${noun}`);
+    showToast?.(`Quittez le cockpit pour rejoindre ${navNounFr(noun)}`);
     return false;
   }
   return stamp?.();
@@ -127,7 +144,7 @@ export function reassertNavigationHandoff({
 } = {}) {
   if (disposed || generation !== currentGeneration) return false;
   if (cockpitActive) {
-    showToast?.('Exit cockpit to fly to a location');
+    showToast?.('Quittez le cockpit pour rejoindre un lieu');
     return false;
   }
   release?.();

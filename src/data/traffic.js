@@ -1215,11 +1215,11 @@ export function deriveTrafficFlowError(error) {
   if (!error || error.name === 'AbortError') return null;
   const message = String(error.message || error);
   const status = Number(message.match(/HTTP (\d{3})/)?.[1]);
-  if (status === 503) return 'TomTom key unavailable';
-  if (status === 429) return 'TomTom daily budget reached';
-  if (status === 502 || status === 504) return 'TomTom upstream unreachable';
-  if (Number.isFinite(status)) return `TomTom flow error (HTTP ${status})`;
-  return 'TomTom flow unavailable';
+  if (status === 503) return 'Clé TomTom indisponible';
+  if (status === 429) return 'Budget quotidien TomTom atteint';
+  if (status === 502 || status === 504) return 'Serveur amont TomTom inaccessible';
+  if (Number.isFinite(status)) return `Erreur de flux TomTom (HTTP ${status})`;
+  return 'Flux TomTom indisponible';
 }
 
 /**
@@ -2171,7 +2171,7 @@ function clearDots() {
  */
 const trafficLayer = {
   id: 'traffic',
-  name: 'Street Traffic',
+  name: 'Trafic routier',
   icon: '🚗',
   source: 'OpenStreetMap',
   /** @type {number} Zero — layer is self-managed via camera listener + preRender */

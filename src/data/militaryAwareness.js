@@ -258,8 +258,8 @@ function ensurePanel() {
 function hidePanel() {
   if (state.panel) {
     const markup = `<div class="military-awareness-standby">
-      <strong>${state.enabled ? 'CONTEXT READY' : 'GLOBAL CONTEXT OFF'}</strong>
-      <span>${state.enabled ? 'SELECT A FLIGHT, VESSEL, OR MAPPED INSTALLATION' : 'ENABLE TO LOAD OBSERVED / MAPPED PROXIMITY'}</span>
+      <strong>${state.enabled ? 'CONTEXTE PRÊT' : 'CONTEXTE GLOBAL DÉSACTIVÉ'}</strong>
+      <span>${state.enabled ? 'SÉLECTIONNER UN VOL, UN NAVIRE OU UNE INSTALLATION RÉPERTORIÉE' : 'ACTIVER POUR CHARGER LA PROXIMITÉ OBSERVÉE / RÉPERTORIÉE'}</span>
     </div>`;
     state.panel.hidden = false;
     if (state.panelMarkup !== markup) {
@@ -354,8 +354,8 @@ export function summarizeInstallationViewport(items, source) {
   return {
     ...summary,
     reason: summary.count
-      ? 'mapped matches from the loaded viewport'
-      : 'viewport feed is not a complete 250 km survey',
+      ? 'correspondances répertoriées dans la vue chargée'
+      : "le flux de la vue n'est pas un relevé complet de 250 km",
   };
 }
 
@@ -492,14 +492,14 @@ function evaluateSubject(subject, sourceStates = collectSourceStates()) {
     evaluatedAt: Date.now(),
     radiusM: AWARENESS_RADIUS_M,
     cohorts: [
-      { id: 'flights', label: 'Flights', source: flightsState.stats.source || SOURCE_LABEL.flights, summary: summarizeAwarenessCohortForNavigation(flights, flightsState) },
-      { id: 'military', label: 'Military flights', source: militaryState.stats.source || SOURCE_LABEL.military, summary: summarizeAwarenessCohortForNavigation(military, militaryState) },
-      { id: 'ais-live-vessels', label: 'AIS vessels', source: vesselsState.stats.source || SOURCE_LABEL['ais-live-vessels'], summary: summarizeAwarenessCohortForNavigation(vessels, vesselsState) },
+      { id: 'flights', label: 'Vols', source: flightsState.stats.source || SOURCE_LABEL.flights, summary: summarizeAwarenessCohortForNavigation(flights, flightsState) },
+      { id: 'military', label: 'Vols militaires', source: militaryState.stats.source || SOURCE_LABEL.military, summary: summarizeAwarenessCohortForNavigation(military, militaryState) },
+      { id: 'ais-live-vessels', label: 'Navires AIS', source: vesselsState.stats.source || SOURCE_LABEL['ais-live-vessels'], summary: summarizeAwarenessCohortForNavigation(vessels, vesselsState) },
       {
         id: 'military-installations',
-        label: 'Mapped installations',
+        label: 'Installations répertoriées',
         source: installationsState.stats.source || SOURCE_LABEL['military-installations'],
-        coverage: 'CURRENT VIEWPORT ONLY',
+        coverage: 'VUE ACTUELLE UNIQUEMENT',
         summary: summarizeInstallationViewport(installations, installationsState),
       },
     ],
@@ -514,10 +514,10 @@ function rowHtml(cohort) {
     const label = formatAwarenessLabel(item);
     const targetId = item.icao24 || item.mmsi || item.id;
     if (!targetId) {
-      return `<li><span class="military-awareness-target unavailable" aria-label="Unavailable">${escapeHtml(label)} <span>${formatAwarenessDistance(item.distanceM)}</span></span></li>`;
+      return `<li><span class="military-awareness-target unavailable" aria-label="Indisponible">${escapeHtml(label)} <span>${formatAwarenessDistance(item.distanceM)}</span></span></li>`;
     }
-    const accessibleLabel = label === '—' ? 'Unavailable' : label;
-    return `<li><button type="button" class="military-awareness-target" data-awareness-layer="${escapeHtml(cohort.id)}" data-awareness-id="${escapeHtml(targetId)}" aria-label="Focus ${escapeHtml(accessibleLabel)}">${escapeHtml(label)} <span>${formatAwarenessDistance(item.distanceM)}</span></button></li>`;
+    const accessibleLabel = label === '—' ? 'Indisponible' : label;
+    return `<li><button type="button" class="military-awareness-target" data-awareness-layer="${escapeHtml(cohort.id)}" data-awareness-id="${escapeHtml(targetId)}" aria-label="Centrer sur ${escapeHtml(accessibleLabel)}">${escapeHtml(label)} <span>${formatAwarenessDistance(item.distanceM)}</span></button></li>`;
   }).join('');
   const pageCount = Math.max(1, Math.ceil(summary.nearest.length / AWARENESS_PAGE_SIZE));
   const pageLabel = pageCount > 1 ? ` · ${Math.floor(page / AWARENESS_PAGE_SIZE) + 1}/${pageCount}` : '';
@@ -967,10 +967,10 @@ export function findCompatibleHistoryIndex(history, startIndex, direction, {
 
 function navigationControlsHtml() {
   const canPrevious = state.navigationIndex > 0;
-  return `<div class="military-awareness-controls" role="group" aria-label="Global Context navigation">
-    <button type="button" data-awareness-action="previous" title="Previous — prior visited contact in the 250 km window"${canPrevious ? '' : ' disabled'}>PREVIOUS</button>
+  return `<div class="military-awareness-controls" role="group" aria-label="Navigation du contexte global">
+    <button type="button" data-awareness-action="previous" title="Précédent — contact visité précédemment dans la fenêtre de 250 km"${canPrevious ? '' : ' disabled'}>PRÉCÉDENT</button>
     <button type="button" data-awareness-action="focus">FOCUS</button>
-    <button type="button" data-awareness-action="next" title="Next — nearest unvisited contact in the 250 km window"${canNavigateNext() ? '' : ' disabled'}>NEXT</button>
+    <button type="button" data-awareness-action="next" title="Suivant — contact non visité le plus proche dans la fenêtre de 250 km"${canNavigateNext() ? '' : ' disabled'}>SUIVANT</button>
   </div>`;
 }
 
@@ -1027,10 +1027,10 @@ function renderResults() {
   if (!state.enabled || !state.results) return hidePanel();
   const panel = ensurePanel();
   const { subject, cohorts } = state.results;
-  const markup = `<div class="military-awareness-subject">${escapeHtml(subject.label)} · ${formatAwarenessDistance(AWARENESS_RADIUS_M)} FLIGHT / VESSEL WINDOW</div>
+  const markup = `<div class="military-awareness-subject">${escapeHtml(subject.label)} · ${formatAwarenessDistance(AWARENESS_RADIUS_M)} FENÊTRE VOL / NAVIRE</div>
     ${navigationControlsHtml()}
     ${cohorts.map(rowHtml).join('')}
-    <p class="military-awareness-note" tabindex="-1" data-awareness-focus-continuation>Open-source mapped/observed context. Missing broadcasts, unloaded map areas, or unmapped sites are not evidence of absence.</p>`;
+    <p class="military-awareness-note" tabindex="-1" data-awareness-focus-continuation>Contexte en source ouverte, cartographié/observé. L'absence de diffusion, une zone de carte non chargée ou un site non répertorié ne constituent pas une preuve d'absence.</p>`;
   panel.hidden = false;
   if (state.panelMarkup !== markup) {
     const focusSnapshot = captureAwarenessPanelFocus(panel);
@@ -1758,7 +1758,7 @@ function focusAttentionTarget() {
 
 const militaryAwarenessLayer = {
   id: 'military-awareness',
-  name: 'Global Context',
+  name: 'Contexte global',
   icon: '◎',
   source: 'Open-source proximity context',
   // Context is entered from its dedicated right rail, not as a raw layer.

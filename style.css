@@ -6367,7 +6367,7 @@ body.cockpit-mode #intel-hud .hud-right-edge { right: 22px; }
 
 /* "Acquiring" caption only when no previous frame is showing underneath */
 .cctv-frame-wrap.loading:not(.has-frame)::before {
-  content: 'ACQUIRING FRAME';
+  content: 'ACQUISITION IMAGE';
   position: absolute;
   inset: 0;
   display: flex;
@@ -9437,7 +9437,15 @@ body.scene-playback-mode #first-run-launcher {
 
 .key-setup-kicker { color: rgba(54, 220, 255, 0.86); }
 
-.key-setup-close {
+.key-setup-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: none;
+}
+
+.key-setup-close,
+.key-setup-minimize {
   display: grid;
   place-items: center;
   padding: 0.15rem;
@@ -9450,13 +9458,16 @@ body.scene-playback-mode #first-run-launcher {
 }
 
 .key-setup-close:hover,
-.key-setup-close:focus-visible {
+.key-setup-close:focus-visible,
+.key-setup-minimize:hover,
+.key-setup-minimize:focus-visible {
   color: rgba(225, 244, 248, 0.95);
   border-color: rgba(54, 220, 255, 0.5);
   outline: none;
 }
 
-.key-setup-close .material-symbols-outlined { font-size: 1rem; }
+.key-setup-close .material-symbols-outlined,
+.key-setup-minimize .material-symbols-outlined { font-size: 1rem; }
 
 #key-setup h2 {
   margin-top: 0.6rem;

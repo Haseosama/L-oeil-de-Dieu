@@ -17,7 +17,7 @@
 /** Chip label — pure, exported for tests. */
 export function keySetupChipLabel(status) {
   const missing = Math.max(0, (status?.total || 0) - (status?.setCount || 0));
-  return missing > 0 ? `POWER UP · ${missing} ${missing === 1 ? 'KEY' : 'KEYS'} WAITING` : 'POWERED UP';
+  return missing > 0 ? `ACTIVER · ${missing} ${missing === 1 ? 'CLÉ' : 'CLÉS'} EN ATTENTE` : 'ACTIVÉ';
 }
 
 /**
@@ -76,13 +76,13 @@ function buildRow(documentRef, key) {
   const tier = documentRef.createElement('span');
   tier.className = 'key-setup-tier';
   tier.textContent = TIER_DOTS[key.tier] || '';
-  tier.title = key.tier === 'metered' ? 'Metered — a billing-enabled account' : 'Free key — register, paste, done';
+  tier.title = key.tier === 'metered' ? 'Facturée — un compte avec facturation activée' : 'Clé gratuite — inscrivez-vous, collez, terminé';
   head.append(led, title, tier);
   if (key.clientExposed) {
     const exposed = documentRef.createElement('span');
     exposed.className = 'key-setup-exposed';
-    exposed.textContent = 'browser-side';
-    exposed.title = 'This key runs in the browser by design — restrict it at the provider (see SECURITY.md)';
+    exposed.textContent = 'côté navigateur';
+    exposed.title = 'Cette clé fonctionne dans le navigateur par conception — restreignez-la chez le fournisseur (voir SECURITY.md)';
     head.append(exposed);
   }
   if (external) {
@@ -90,8 +90,8 @@ function buildRow(documentRef, key) {
     // facts this panel reports, never values it rewrites or deletes.
     const badge = documentRef.createElement('span');
     badge.className = 'key-setup-external';
-    badge.textContent = 'configured externally';
-    badge.title = 'Supplied by your environment, Keychain, or launcher — change it where it was set';
+    badge.textContent = 'configurée en externe';
+    badge.title = 'Fournie par votre environnement, votre trousseau ou un lanceur — modifiez-la là où elle a été définie';
     head.append(badge);
   }
   const get = documentRef.createElement('a');
@@ -99,7 +99,7 @@ function buildRow(documentRef, key) {
   get.href = key.getUrl;
   get.target = '_blank';
   get.rel = 'noopener noreferrer';
-  get.textContent = key.set ? 'MANAGE ↗' : 'GET KEY ↗';
+  get.textContent = key.set ? 'GÉRER ↗' : 'OBTENIR LA CLÉ ↗';
   head.append(get);
 
   const unlocks = documentRef.createElement('p');
@@ -120,8 +120,8 @@ function buildRow(documentRef, key) {
       input.dataset.envVar = envVar;
       input.setAttribute('aria-label', envVar);
       input.placeholder = key.set
-        ? `${envVar} saved — paste to replace`
-        : `paste ${envVar}`;
+        ? `${envVar} enregistrée — coller pour remplacer`
+        : `coller ${envVar}`;
       fields.append(input);
     }
     if (key.managed === 'file') {
@@ -129,8 +129,8 @@ function buildRow(documentRef, key) {
       remove.type = 'button';
       remove.className = 'key-setup-remove';
       remove.dataset.keySetupRemove = JSON.stringify(key.envVars);
-      remove.textContent = 'REMOVE';
-      remove.title = `Remove ${key.title} from this app's saved keys`;
+      remove.textContent = 'SUPPRIMER';
+      remove.title = `Supprimer ${key.title} des clés enregistrées de cette application`;
       fields.append(remove);
     }
     row.append(fields);
@@ -165,6 +165,7 @@ export async function initKeySetup({ documentRef = globalThis.document, fetchImp
   const rowsHost = root.querySelector('[data-key-setup-rows]');
   const applyButton = root.querySelector('[data-key-setup-apply]');
   const closeButton = root.querySelector('[data-key-setup-close]');
+  const minimizeButton = root.querySelector('[data-key-setup-minimize]');
   const chipLabel = chip.querySelector('[data-key-setup-chip-label]') || chip;
   const statusLine = root.querySelector('[data-key-setup-status]');
   const defaultStatusText = statusLine?.textContent || '';
@@ -252,15 +253,15 @@ export async function initKeySetup({ documentRef = globalThis.document, fetchImp
   const say = (text) => { if (statusLine) statusLine.textContent = text; };
 
   const storeLabel = () => (status?.store === 'pinokio-environment'
-    ? 'your app configuration'
-    : 'your local .env');
+    ? 'la configuration de l\'application'
+    : 'votre fichier .env local');
 
   const submitUpdates = async (updates, doneVerb) => {
     if (busy) return;
     const googleWasUnset = !status?.keys?.find((key) => key.id === 'google-maps')?.set;
     busy = true;
     applyButton?.setAttribute('aria-disabled', 'true');
-    say('Saving…');
+    say('Enregistrement…');
     try {
       const response = await doFetch('/api/setup/keys', {
         method: 'POST',
@@ -269,7 +270,7 @@ export async function initKeySetup({ documentRef = globalThis.document, fetchImp
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload.ok) {
-        say(payload.error || `Save failed (${response.status}).`);
+        say(payload.error || `Échec de l'enregistrement (${response.status}).`);
         return;
       }
       for (const input of root.querySelectorAll('input[data-env-var]')) input.value = '';
@@ -288,9 +289,9 @@ export async function initKeySetup({ documentRef = globalThis.document, fetchImp
         // the restart's reload lands, so strip again at the door.
         globalThis.addEventListener?.('pagehide', strip, { once: true });
       }
-      say(`${doneVerb} ${storeLabel()}. Restarting — this page reloads itself.`);
+      say(`${doneVerb} ${storeLabel()}. Redémarrage — cette page se recharge automatiquement.`);
     } catch (error) {
-      say(`Save failed: ${error?.message || error}`);
+      say(`Échec de l'enregistrement : ${error?.message || error}`);
     } finally {
       busy = false;
       applyButton?.setAttribute('aria-disabled', 'false');
@@ -304,14 +305,17 @@ export async function initKeySetup({ documentRef = globalThis.document, fetchImp
       inputs.map((input) => ({ envVar: input.dataset.envVar, value: input.value })),
     );
     if (!Object.keys(updates).length) {
-      say('Paste at least one key first.');
+      say('Collez au moins une clé d\'abord.');
       return;
     }
-    await submitUpdates(updates, 'Saved to');
+    await submitUpdates(updates, 'Enregistrée dans');
   };
 
   chip.addEventListener('click', openDialog);
   closeButton?.addEventListener('click', close);
+  // Minimize is the same hide as close: inputs and unsaved values stay put,
+  // and the always-present chip is the reopen affordance either way.
+  minimizeButton?.addEventListener('click', close);
   applyButton?.addEventListener('click', onApply);
   // Remove buttons are rendered per row; delegate so re-renders stay wired.
   rowsHost?.addEventListener('click', (event) => {
@@ -328,11 +332,11 @@ export async function initKeySetup({ documentRef = globalThis.document, fetchImp
     // stop it — a clickjack target. A confirm turns a single aligned click into
     // a deliberate two-step the lure cannot pre-satisfy.
     const ok = typeof globalThis.confirm !== 'function'
-      || globalThis.confirm('Remove this key from your saved configuration?');
+      || globalThis.confirm('Supprimer cette clé de votre configuration enregistrée ?');
     if (!ok) return;
     void submitUpdates(
       Object.fromEntries(envVars.map((name) => [name, null])),
-      'Removed from',
+      'Supprimée de',
     );
   });
 

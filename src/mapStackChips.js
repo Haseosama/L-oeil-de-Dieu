@@ -39,7 +39,7 @@ export function mapStackChipModel(stack, activeId) {
   const requiresIon = stack?.requiresIon === true;
   const fallbackReason = requiresIon
     ? keySetupRequirement('cesium-ion')
-    : `${label || 'This map stack'} is unavailable`;
+    : `${label || 'Cette source cartographique'} n'est pas disponible`;
   const unavailableHint = available ? '' : String(stack?.unavailableReason || fallbackReason);
   return {
     id: String(stack?.id ?? ''),
@@ -102,7 +102,7 @@ export function renderMapStackChips(container, stacks, { activeId = null, onSele
     chip.setAttribute('aria-pressed', String(model.active));
     chip.setAttribute('aria-disabled', String(!model.available));
     if (!model.available) {
-      chip.setAttribute('aria-label', `${model.label} unavailable: ${model.unavailableHint}`);
+      chip.setAttribute('aria-label', `${model.label} indisponible : ${model.unavailableHint}`);
     }
 
     const label = ownerDoc.createElement('span');

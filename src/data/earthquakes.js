@@ -159,7 +159,7 @@ export function createEarthquakesLayer({ overlayHost = DEFAULT_OVERLAY_HOST } = 
 
   const layer = {
   id: 'earthquakes',
-  name: 'Earthquakes (24h)',
+  name: 'Séismes (24h)',
   icon: '🌋',
   source: 'USGS',
   updateInterval: 60000,
@@ -275,7 +275,7 @@ export function createEarthquakesLayer({ overlayHost = DEFAULT_OVERLAY_HOST } = 
 
     } catch (e) {
       console.warn('[Data:Earthquakes] Fetch error:', e);
-      _lastError = 'USGS network error';
+      _lastError = 'Erreur réseau USGS';
       return false;
     }
   },

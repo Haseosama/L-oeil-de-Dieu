@@ -18,23 +18,26 @@ export const VESSEL_CARD_FADE_DISTANCE_M = 5_000_000;
  * AIS type family → chevron hue + card accent. Single source of truth for
  * vessel type colors so billboard chevrons and host cards cannot drift apart.
  */
+// Patterns match both raw AIS free-text type descriptions (English, sourced
+// verbatim from vessel transponders — never translated) and the French
+// display strings this module derives from numeric AIS type codes below.
 const TYPE_STYLES = [
-  { pattern: /tanker/i, css: '#ffb347', accent: '255, 179, 71' },
+  { pattern: /tanker|citerne/i, css: '#ffb347', accent: '255, 179, 71' },
   { pattern: /cargo|container|bulk|carrier/i, css: '#39d5ff', accent: '57, 213, 255' },
-  { pattern: /passenger|ferry|cruise/i, css: '#ff7adf', accent: '255, 122, 223' },
-  { pattern: /fishing/i, css: '#7cff9b', accent: '124, 255, 155' },
-  { pattern: /tug|tow|pilot|supply|service/i, css: '#f7f0a3', accent: '247, 240, 163' },
+  { pattern: /passenger|passagers|ferry|cruise/i, css: '#ff7adf', accent: '255, 122, 223' },
+  { pattern: /fishing|pêche/i, css: '#7cff9b', accent: '124, 255, 155' },
+  { pattern: /tug|remorqu|tow|pilot|pilote|supply|service/i, css: '#f7f0a3', accent: '247, 240, 163' },
 ];
 const DEFAULT_STYLE = { css: '#39d5ff', accent: '57, 213, 255' };
 
 const NUMERIC_TYPE_SPECIALS = {
-  30: 'FISHING', 31: 'TOWING', 32: 'TOWING', 33: 'DREDGER', 34: 'DIVE OPS',
-  35: 'MILITARY', 36: 'SAILING', 37: 'PLEASURE',
-  50: 'PILOT', 51: 'SAR', 52: 'TUG', 53: 'PORT TENDER', 54: 'ANTI-POLLUTION',
-  55: 'LAW ENFORCE', 58: 'MEDICAL',
+  30: 'PÊCHE', 31: 'REMORQUAGE', 32: 'REMORQUAGE', 33: 'DRAGUE', 34: 'OPS PLONGÉE',
+  35: 'MILITAIRE', 36: 'VOILE', 37: 'PLAISANCE',
+  50: 'PILOTE', 51: 'SAR', 52: 'REMORQUEUR', 53: 'NAVETTE PORTUAIRE', 54: 'ANTI-POLLUTION',
+  55: 'POLICE', 58: 'MÉDICAL',
 };
 const NUMERIC_TYPE_FAMILIES = {
-  4: 'HIGH-SPEED', 6: 'PASSENGER', 7: 'CARGO', 8: 'TANKER', 9: 'OTHER',
+  4: 'GRANDE VITESSE', 6: 'PASSAGERS', 7: 'CARGO', 8: 'CITERNE', 9: 'AUTRE',
 };
 
 /**
@@ -49,7 +52,7 @@ export function normalizeVesselType(type) {
   const code = Number(text);
   if (code <= 0) return '';
   if (NUMERIC_TYPE_SPECIALS[code]) return NUMERIC_TYPE_SPECIALS[code];
-  return NUMERIC_TYPE_FAMILIES[Math.floor(code / 10)] || 'OTHER';
+  return NUMERIC_TYPE_FAMILIES[Math.floor(code / 10)] || 'AUTRE';
 }
 
 /** AIS ship type → CSS hex hue for the billboard chevron. */

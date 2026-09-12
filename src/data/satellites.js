@@ -1985,7 +1985,7 @@ const satellitesLayer = {
     if (outcome.status !== 'accepted' && outcome.status !== 'partial') {
       return {
         status: 'source-unavailable',
-        reason: 'CelesTrak catalog unavailable',
+        reason: 'Catalogue CelesTrak indisponible',
         refreshEpoch: outcome.epoch,
       };
     }

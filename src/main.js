@@ -45,10 +45,10 @@ initLogoGaze();
  * @returns {string} best-effort error description
  */
 function describeError(error) {
-  if (!error) return 'Unknown initialization error';
+  if (!error) return 'Erreur d\'initialisation inconnue';
   if (error instanceof Error) {
     if (error.message && error.message.trim()) return error.message.trim();
-    return error.name || 'Initialization error';
+    return error.name || 'Erreur d\'initialisation';
   }
   if (typeof error === 'string' && error.trim()) return error.trim();
   if (typeof error === 'object') {
@@ -74,7 +74,7 @@ async function init() {
   const loaderStatus = loadingScreen.querySelector('.loader-status');
 
   try {
-    loaderStatus.textContent = 'Configuring viewer...';
+    loaderStatus.textContent = 'Configuration du viewer...';
 
     // A direct Google key provides Google 3D plus GEV place search. Cesium ion
     // can host the same 3D tiles and also powers Bing/world-terrain stacks.
@@ -148,8 +148,8 @@ async function init() {
     viewer.scene.skyAtmosphere.brightnessShift = -0.08;
 
     loaderStatus.textContent = googleApiKey || cesiumToken
-      ? 'Loading Google 3D Tiles...'
-      : 'Loading the keyless globe...';
+      ? 'Chargement des tuiles 3D Google...'
+      : 'Chargement du globe sans clé...';
     const photoreal = await loadPhotorealisticTileset(Cesium, {
       googleApiKey,
       cesiumToken,
@@ -166,12 +166,12 @@ async function init() {
         const tileError = photoreal.errors.at(-1);
         console.warn('[Init] Google 3D Tiles unavailable, using the keyless globe:', tileError);
         const tileErrorDetail = describeError(tileError);
-        loaderStatus.textContent = `Google 3D Tiles unavailable (${tileErrorDetail}). Loading the keyless globe...`;
+        loaderStatus.textContent = `Tuiles 3D Google indisponibles (${tileErrorDetail}). Chargement du globe sans clé...`;
       }
       viewer.scene.globe.show = true;
     }
 
-    loaderStatus.textContent = 'Initializing systems...';
+    loaderStatus.textContent = 'Initialisation des systèmes...';
 
     const mapStackController = new MapStackController(viewer, {
       googleTileset: tileset,
@@ -199,10 +199,10 @@ async function init() {
 
     // If no share link state, do default fly-to Austin
     if (!styleManager.hasShareState) {
-      loaderStatus.textContent = 'Flying to Austin, TX...';
+      loaderStatus.textContent = 'Envol vers Austin, TX...';
       flyToAustin(viewer);
     } else {
-      loaderStatus.textContent = 'Restoring shared view...';
+      loaderStatus.textContent = 'Restauration de la vue partagée...';
     }
 
     // Initialize data layer manager
@@ -332,7 +332,7 @@ async function init() {
 
   } catch (error) {
     console.error("God's Eye View initialization failed:", error);
-    loaderStatus.textContent = `Error: ${describeError(error)}`;
+    loaderStatus.textContent = `Erreur : ${describeError(error)}`;
     loaderStatus.style.color = '#ff4444';
   }
 }

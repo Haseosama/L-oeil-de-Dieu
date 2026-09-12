@@ -58,7 +58,7 @@ const DEFAULT_ACTIVE_LABELS = 900;
 const REFRESH_MS = 60000;
 /** Bounded wait for the first accepted vessel position in one enabled session. */
 export const AIS_FIRST_CONNECT_GRACE_MS = 30000;
-const AIS_FIRST_CONNECT_LABEL = 'awaiting first AIS position…';
+const AIS_FIRST_CONNECT_LABEL = 'en attente de la première position AIS…';
 const VISIBILITY_UPDATE_MS = 800;
 /** Focus alpha alone samples faster inside the existing preRender pass. */
 const FOCUS_UPDATE_MS = 80;
@@ -109,12 +109,12 @@ let _aisSessionSequence = 0;
  * "just now · 0 vessels".
  */
 const AIS_STATUS_REASON = {
-  'missing-key': 'AISSTREAM_API_KEY not set',
-  unsupported: 'live feed unsupported',
-  connecting: 'connecting to feed…',
-  closed: 'feed disconnected',
-  error: 'feed down',
-  idle: 'feed idle',
+  'missing-key': 'AISSTREAM_API_KEY non définie',
+  unsupported: 'flux en direct non pris en charge',
+  connecting: 'connexion au flux…',
+  closed: 'flux déconnecté',
+  error: 'flux hors service',
+  idle: 'flux inactif',
 };
 
 /**
@@ -155,19 +155,19 @@ function describeDegradedAisFeed(status, payload) {
   if (status === 'auth-failed') {
     // Actionable, not a countdown: retrying cannot fix a rejected credential,
     // so the chip asks the operator to do the one thing that can.
-    return 'API key rejected — check AISSTREAM_API_KEY';
+    return 'Clé API rejetée — vérifier AISSTREAM_API_KEY';
   }
   if (status === 'stale') {
     const silentSec = Math.round(Number(payload?.silentForMs) / 1000);
     return Number.isFinite(silentSec) && silentSec > 0
-      ? `feed silent ${silentSec}s — no AIS data`
-      : 'feed silent — no AIS data';
+      ? `flux silencieux depuis ${silentSec}s — aucune donnée AIS`
+      : 'flux silencieux — aucune donnée AIS';
   }
   const attempt = Number(payload?.reconnectAttempt);
-  const suffix = Number.isFinite(attempt) && attempt >= 1 ? ` (attempt ${attempt})` : '';
+  const suffix = Number.isFinite(attempt) && attempt >= 1 ? ` (tentative ${attempt})` : '';
   return status === 'down'
-    ? `feed down — retrying slowly${suffix}`
-    : `reconnecting to feed…${suffix}`;
+    ? `flux hors service — nouvelle tentative lente${suffix}`
+    : `reconnexion au flux…${suffix}`;
 }
 
 /**
@@ -190,12 +190,12 @@ export function deriveAisFeedError(payload, acceptedRowCount) {
   if (acceptedRowCount > 0) return null; // accepted rows may be stale while reconnecting, but remain usable
   if (AIS_HEALTHY_STATUSES.has(status)) {
     return payload?.lastMessageAt
-      ? 'awaiting usable AIS positions…'
-      : 'awaiting first AIS message…';
+      ? 'en attente de positions AIS exploitables…'
+      : 'en attente du premier message AIS…';
   }
   if (!status) return null;
   const detail = typeof payload.error === 'string' && payload.error.trim() ? payload.error.trim() : '';
-  const reason = AIS_STATUS_REASON[status] || 'feed unavailable';
+  const reason = AIS_STATUS_REASON[status] || 'flux indisponible';
   return detail && !AIS_STATUS_REASON[status] ? `${reason} (${detail})` : reason;
 }
 
@@ -225,7 +225,7 @@ export function classifyAisFeedSnapshot(payload) {
     rawRowCount: rawRows.length,
     acceptedRowCount,
     error: deriveAisFeedError(payload, acceptedRowCount)
-      || (acceptedRowCount === 0 ? 'awaiting usable AIS positions…' : null),
+      || (acceptedRowCount === 0 ? 'en attente de positions AIS exploitables…' : null),
   };
 }
 
@@ -337,7 +337,7 @@ const shipIconCache = new Map();
 
 const aisLiveVesselsLayer = {
   id: 'ais-live-vessels',
-  name: 'Live AIS Vessels',
+  name: 'Navires AIS en direct',
   icon: '◭',
   source: 'AISStream',
   updateInterval: REFRESH_MS,
@@ -625,7 +625,7 @@ const aisLiveVesselsLayer = {
       result.push({
         position,
         sourceId: record.mmsi,
-        id: record.name || record.mmsi || 'VESSEL',
+        id: record.name || record.mmsi || 'NAVIRE',
         type: 'SEA',
         skipLabel: record === selected,
         klass: record.type ? String(record.type).toUpperCase().slice(0, 14) : undefined,
@@ -809,8 +809,8 @@ function scheduleFirstConnectExpiry(sessionId, delayMs) {
     state.firstConnectPhase = 'unavailable';
     state.loadingLabel = '';
     state.error = state.lastMessageAt
-      ? 'awaiting usable AIS positions…'
-      : 'awaiting first AIS message…';
+      ? 'en attente de positions AIS exploitables…'
+      : 'en attente du premier message AIS…';
     state.stale = state.count > 0;
   }, delayMs);
 }
@@ -831,14 +831,14 @@ function isDefinitiveTransportFailure(status) {
 
 function markAisUnavailable(reason) {
   settleFirstConnectPhase('unavailable');
-  state.error = reason || 'AIS live load failed';
+  state.error = reason || 'Échec du chargement AIS en direct';
   state.stale = state.count > 0;
 }
 
 async function loadLivePositions(viewer) {
   if (!viewer || state.loading) return;
   state.loading = true;
-  state.loadingLabel = state.loaded ? 'refreshing...' : 'loading...';
+  state.loadingLabel = state.loaded ? 'actualisation...' : 'chargement...';
   const requestController = new AbortController();
   const requestSessionId = state.sessionId;
   state.abort = requestController;
@@ -858,7 +858,7 @@ async function loadLivePositions(viewer) {
     if (!response.ok) {
       // The 503 key-absent / 502 stream-error bodies still carry {status,error}.
       // Prefer a clean surfaced reason over a cryptic "AIS live HTTP 503".
-      let reason = `AIS live HTTP ${response.status}`;
+      let reason = `AIS en direct — HTTP ${response.status}`;
       try {
         const errPayload = await response.json();
         if (!ownsAisRequest(requestController, requestSessionId)) return;
@@ -873,7 +873,7 @@ async function loadLivePositions(viewer) {
     applyAisFeedSnapshot(viewer, payload);
   } catch (error) {
     if (ownsAisRequest(requestController, requestSessionId) && error?.name !== 'AbortError') {
-      markAisUnavailable(error?.message || 'AIS live load failed');
+      markAisUnavailable(error?.message || 'Échec du chargement AIS en direct');
       console.warn('[Data:ais-live-vessels]', state.error, error);
     }
   } finally {
@@ -1143,7 +1143,7 @@ function normalizeVessel(row) {
   return {
     lat,
     lon,
-    name: String(row.name || row.input_name || row.mmsi || row.input_identifier || 'VESSEL'),
+    name: String(row.name || row.input_name || row.mmsi || row.input_identifier || 'NAVIRE'),
     mmsi: String(row.mmsi || row.input_identifier || '').trim(),
     imo: String(row.imo || ''),
     type: String(row.type_specific || row.type || ''),
@@ -1419,7 +1419,7 @@ function publishVesselOverlayEntries(entries) {
         : '';
       return {
         ...card,
-        accessibilityLabel: `Focus vessel ${card.title}, MMSI ${mmsi}`,
+        accessibilityLabel: `Centrer sur le navire ${card.title}, MMSI ${mmsi}`,
         activate: () => {
           const record = state.vesselMap.get(mmsi);
           if (!record) return false;
@@ -1448,7 +1448,7 @@ function labelPriority(record, selected) {
 
 function hasUsefulName(record) {
   const text = String(record.name || '').trim();
-  return Boolean(text && text !== 'VESSEL' && !/^MMSI\s*\d+$/i.test(text) && text !== record.mmsi);
+  return Boolean(text && text !== 'NAVIRE' && !/^MMSI\s*\d+$/i.test(text) && text !== record.mmsi);
 }
 
 function installInteraction(viewer) {
@@ -1734,7 +1734,7 @@ function registerSelectedContext(record) {
     return registerEntityContext(record, {
       id: `ais-${record.mmsi}`,
       layerId: 'ais-live-vessels',
-      layerName: 'Live AIS Vessels',
+      layerName: 'Navires AIS en direct',
       source: 'AISStream',
       label: displayVesselName(record),
       latitude: record.lat,
@@ -1790,8 +1790,8 @@ function updateSelectedVesselHud(record) {
   el.classList.add('active');
   el.textContent = [
     `AIS: ${trimHudValue(record.name, 32)}`,
-    `${trimHudValue(record.type || 'VESSEL', 24)}  SPD: ${formatSpeed(record.speed)}  HDG: ${formatHeading(record.heading ?? record.course)}`,
-    `MMSI: ${record.mmsi || '--'}  ${formatPositionTime(record)}${stale ? '  · STALE' : ''}`,
+    `${trimHudValue(record.type || 'NAVIRE', 24)}  SPD: ${formatSpeed(record.speed)}  HDG: ${formatHeading(record.heading ?? record.course)}`,
+    `MMSI: ${record.mmsi || '--'}  ${formatPositionTime(record)}${stale ? '  · PÉRIMÉ' : ''}`,
   ].join('\n');
 }
 
@@ -1846,14 +1846,14 @@ export function buildVesselCard(record) {
 export function buildSelectedVesselCard(record) {
   const direction = record.heading ?? record.course;
   const details = [[
-    vesselTypeShort(record) || 'VESSEL',
+    vesselTypeShort(record) || 'NAVIRE',
     formatSpeed(record.speed),
     Number.isFinite(direction) ? `${Math.round(direction)}°` : '--°',
   ].join(' · ')];
   const destination = String(record.destination || '').trim();
   if (destination) details.push(`→ ${trimHudValue(destination, 24)}`);
   const stale = (record.missedRefreshes || 0) > 0;
-  details.push(`MMSI ${record.mmsi || '--'} · ${formatPositionTime(record)}${stale ? ' · STALE' : ''}`);
+  details.push(`MMSI ${record.mmsi || '--'} · ${formatPositionTime(record)}${stale ? ' · PÉRIMÉ' : ''}`);
   return {
     id: vesselOverlayEntryId(record),
     actionable: Boolean(record?.mmsi),
@@ -1871,7 +1871,7 @@ export function buildSelectedVesselCard(record) {
 function vesselOverlayEntryId(record) {
   const mmsi = String(record?.mmsi || '').trim();
   if (mmsi) return `vessel:${mmsi}`;
-  const name = String(record?.name || 'VESSEL').trim() || 'VESSEL';
+  const name = String(record?.name || 'NAVIRE').trim() || 'NAVIRE';
   const lat = Number.isFinite(record?.lat) ? record.lat.toFixed(5) : 'x';
   const lon = Number.isFinite(record?.lon) ? record.lon.toFixed(5) : 'x';
   return `vessel:unkeyed:${name}:${lat}:${lon}`;
@@ -1903,8 +1903,8 @@ export function cardScreenSeparated(accepted, screen, minSepPx) {
 
 function displayVesselName(record) {
   const name = String(record.name || '').trim();
-  if (name && name !== 'VESSEL' && name !== record.mmsi) return name;
-  return record.mmsi ? `MMSI ${record.mmsi}` : 'VESSEL';
+  if (name && name !== 'NAVIRE' && name !== record.mmsi) return name;
+  return record.mmsi ? `MMSI ${record.mmsi}` : 'NAVIRE';
 }
 
 function formatSpeed(speed) {
@@ -1916,9 +1916,9 @@ function formatHeading(heading) {
 }
 
 function formatPositionTime(record) {
-  if (!record.lastPositionUtc) return 'POS: LIVE';
+  if (!record.lastPositionUtc) return 'POS: DIRECT';
   const date = new Date(record.lastPositionUtc);
-  if (Number.isNaN(date.getTime())) return 'POS: LIVE';
+  if (Number.isNaN(date.getTime())) return 'POS: DIRECT';
   return `POS: ${date.toISOString().slice(11, 19)}Z`;
 }
 

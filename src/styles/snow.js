@@ -5,8 +5,8 @@
 export const snowShader = {
   name: 'snow',
   uniforms: {
-    density: { default: 0.6, min: 0, max: 1, label: 'Density' },
-    wind: { default: 0.5, min: 0, max: 1, label: 'Wind' },
+    density: { default: 0.6, min: 0, max: 1, label: 'Densité' },
+    wind: { default: 0.5, min: 0, max: 1, label: 'Vent' },
   },
   fragmentShader: /* glsl */ `
     uniform sampler2D colorTexture;

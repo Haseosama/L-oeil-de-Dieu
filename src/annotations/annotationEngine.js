@@ -887,9 +887,9 @@ export function createAnnotationEngine({
     async demo() {
       return annotate([
         { type: 'highlight', target: 'Palace of Fine Arts, San Francisco', label: 'Palace of Fine Arts', color: 'amber' },
-        { type: 'area', target: 'Presidio of San Francisco', label: 'The Presidio (former Army base)', color: 'green', footprint: true },
+        { type: 'area', target: 'Presidio of San Francisco', label: 'Le Presidio (ancienne base militaire)', color: 'green', footprint: true },
         { type: 'pin', target: 'Letterman Digital Arts Center, San Francisco', label: 'ILM / Lucasfilm', color: 'cyan' },
-        { type: 'arrow', target: 'Palace of Fine Arts, San Francisco', toTarget: 'Marina District, San Francisco', label: 'next to the Marina' },
+        { type: 'arrow', target: 'Palace of Fine Arts, San Francisco', toTarget: 'Marina District, San Francisco', label: 'à côté de la Marina' },
       ], { flyTo: true, clearPrevious: true, persist: true });
     },
 
@@ -904,15 +904,15 @@ export function createAnnotationEngine({
       await wait(3200);
       await annotate([{ type: 'highlight', target: 'Palace of Fine Arts, San Francisco', label: 'Palace of Fine Arts', color: 'amber' }], { persist: true });
       await wait(2600);
-      await annotate([{ type: 'arrow', target: 'Palace of Fine Arts, San Francisco', toTarget: 'Marina Green, San Francisco', label: 'next to the Marina', color: 'cyan' }], { persist: true });
+      await annotate([{ type: 'arrow', target: 'Palace of Fine Arts, San Francisco', toTarget: 'Marina Green, San Francisco', label: 'à côté de la Marina', color: 'cyan' }], { persist: true });
       await wait(2600);
       flyTo({ lon: -122.4545, lat: 37.7880, height: 1500, heading: 18, pitch: -32, duration: 3 });
       await wait(3200);
-      await annotate([{ type: 'area', target: 'Presidio of San Francisco', label: 'The Presidio — a former Army base', color: 'green', footprint: true }], { persist: true });
+      await annotate([{ type: 'area', target: 'Presidio of San Francisco', label: 'Le Presidio — une ancienne base militaire', color: 'green', footprint: true }], { persist: true });
       await wait(2800);
       await annotate([{ type: 'pin', target: 'Letterman Digital Arts Center, San Francisco', label: 'ILM / Lucasfilm', color: 'red' }], { persist: true });
       await wait(2600);
-      await annotate([{ type: 'route', color: 'amber', label: 'Crissy Field shoreline', points: [
+      await annotate([{ type: 'route', color: 'amber', label: 'Littoral de Crissy Field', points: [
         { target: 'Palace of Fine Arts, San Francisco' },
         { target: 'Crissy Field, San Francisco' },
         { target: 'Fort Point, San Francisco' },

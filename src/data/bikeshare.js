@@ -1377,7 +1377,7 @@ async function activateCity(cityId, generation) {
   } catch (error) {
     if (error?.name === 'AbortError') return;
     console.warn(`[Data:Bikeshare] ${cityId} activate error:`, error);
-    _error = 'GBFS fetch error';
+    _error = 'Erreur de récupération GBFS';
     deactivateCity(cityId);
     _activeCityIds.delete(cityId);
   } finally {
@@ -1451,7 +1451,7 @@ function onCameraChanged() {
  */
 const bikeshareLayer = {
   id: 'bikeshare',
-  name: 'Bikeshare',
+  name: 'Vélos en libre-service',
   icon: '🚲',
   source: 'GBFS',
   updateInterval: STATUS_POLL_MS,
@@ -1581,7 +1581,7 @@ const bikeshareLayer = {
       } catch (error) {
         if (error?.name === 'AbortError') return;
         console.warn(`[Data:Bikeshare] ${cityId} status update error:`, error);
-        _error = 'GBFS status update failed';
+        _error = 'Échec de la mise à jour du statut GBFS';
       }
     }));
 

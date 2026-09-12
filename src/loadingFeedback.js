@@ -181,7 +181,7 @@ export function reduceTrafficSyncFeedback(previous, {
       // Neutral default: the layer always supplies its own LIVE/SIMULATED
       // label, and a fallback string must never claim a live feed on a
       // keyless build.
-      label: label || 'syncing road network',
+      label: label || 'synchronisation du réseau routier',
       progressText: hasProgress ? `${progressPct}%` : '...',
     };
   }
@@ -305,22 +305,22 @@ export function presentLoadingFeedback(state, summary, nowMs) {
   }
   if (!state?.visible) return null;
   if (state.phase === 'terminal') {
-    const labels = { complete: 'LOAD COMPLETE', cancelled: 'LOAD CANCELLED', error: 'LOAD FAILED' };
+    const labels = { complete: 'CHARGEMENT TERMINÉ', cancelled: 'CHARGEMENT ANNULÉ', error: 'ÉCHEC DU CHARGEMENT' };
     const label = state.operation === 'disabling' && state.terminal === 'complete'
-      ? 'LIVE DATA OFF'
+      ? 'DONNÉES EN DIRECT DÉSACTIVÉES'
       : state.terminal === 'complete' && state.activeIds?.length === 1 && state.activeIds[0] === 'military-installations'
-        ? 'MAPPED SITES LOADED' : labels[state.terminal] || 'LOAD COMPLETE';
+        ? 'SITES CARTOGRAPHIÉS CHARGÉS' : labels[state.terminal] || 'CHARGEMENT TERMINÉ';
     return { state: state.terminal, label, detail: '' };
   }
   const active = summary.active;
   if (active.length === 1 && active[0].installationRetry && !summary.disabling) {
     return { state: 'loading', label: active[0].installationRetry.retrying
-      ? 'RETRYING MAPPED SITES' : 'FETCHING MAPPED SITES', detail: 'OpenStreetMap · Overpass' };
+      ? 'NOUVELLE TENTATIVE · SITES CARTOGRAPHIÉS' : 'RÉCUPÉRATION DES SITES CARTOGRAPHIÉS', detail: 'OpenStreetMap · Overpass' };
   }
   const elapsed = Math.max(0, nowMs - state.startedAt);
   const label = summary.disabling
-    ? 'TURNING OFF LIVE DATA'
-    : summary.refresh ? 'REFRESHING LIVE DATA' : 'LOADING LIVE DATA';
+    ? 'DÉSACTIVATION DES DONNÉES EN DIRECT'
+    : summary.refresh ? 'ACTUALISATION DES DONNÉES EN DIRECT' : 'CHARGEMENT DES DONNÉES EN DIRECT';
   const names = active.slice(0, 2).map((record) => record.label).join(' · ');
   const suffix = active.length > 2 ? ` +${active.length - 2}` : '';
   return {

@@ -186,10 +186,10 @@ export function missionPathPresentation(launch, replayAvailable = false) {
     )).length
     : 0;
   return {
-    orbit: orbitName ? `${orbitAllowed ? '' : 'PLANNED · '}${orbitName}` : null,
+    orbit: orbitName ? `${orbitAllowed ? '' : 'PRÉVU · '}${orbitName}` : null,
     ascent: suppliedTrajectoryPoints > 1
-      ? 'SUPPLIED TRAJECTORY POINTS'
-      : replayAvailable ? 'RECONSTRUCTED ESTIMATE' : 'UNAVAILABLE',
+      ? 'POINTS DE TRAJECTOIRE FOURNIS'
+      : replayAvailable ? 'ESTIMATION RECONSTITUÉE' : 'INDISPONIBLE',
     replayAvailable: Boolean(replayAvailable),
   };
 }
@@ -478,7 +478,7 @@ function focusFullGlobe(viewer, duration = 2.4) {
 }
 
 function shortMissionLabel(name, maxLength = 24) {
-  const text = String(name || 'Unnamed mission').replace(/\s+/g, ' ').trim().split(' | ')[0];
+  const text = String(name || 'Mission sans nom').replace(/\s+/g, ' ').trim().split(' | ')[0];
   const compact = text.split(' — ')[0].trim();
   return compact.length > maxLength ? `${compact.slice(0, maxLength - 1).trimEnd()}…` : compact;
 }
@@ -511,8 +511,8 @@ export function createRocketMissionMarkerOverlayEntry(launch, position, selected
   const launchTimeMs = Date.parse(launch?.launchTime);
   const details = selected
     ? [siteName
-      ? `LAUNCH SITE · ${shortMissionLabel(siteName, 20).toUpperCase()}`
-      : 'LAUNCH SITE']
+      ? `SITE DE LANCEMENT · ${shortMissionLabel(siteName, 20).toUpperCase()}`
+      : 'SITE DE LANCEMENT']
     : [];
   return {
     id: `launch:${launch?.id}`,
@@ -903,7 +903,7 @@ export function resolveMissionRosterPreviewLaunch(launches, launchId) {
  */
 export function formatMissionEventTime(launchTime) {
   const date = new Date(launchTime);
-  if (!launchTime || !Number.isFinite(date.getTime())) return 'UNAVAILABLE';
+  if (!launchTime || !Number.isFinite(date.getTime())) return 'INDISPONIBLE';
   return `${date.toISOString().slice(0, 10)}\n${date.toISOString().slice(11, 19)} UTC`;
 }
 
@@ -1935,10 +1935,10 @@ function syncReplayButton() {
   if (speedControl) speedControl.hidden = !replayAvailable;
   button.hidden = active || !replayAvailable;
   button.disabled = !replayAvailable;
-  button.textContent = 'REPLAY ASCENT';
+  button.textContent = 'REJOUER L\'ASCENSION';
   button.classList.remove('active');
   button.setAttribute('aria-pressed', String(active));
-  button.title = 'Replay the estimated ascent with a following camera';
+  button.title = 'Rejouer l\'ascension estimée avec une caméra suiveuse';
   if (transport) {
     transport.hidden = !active;
     transport.classList.toggle('is-paused', active && _replayPaused);
@@ -1946,8 +1946,8 @@ function syncReplayButton() {
     if (toggleButton) {
       toggleButton.disabled = !active;
       toggleButton.textContent = _replayPaused ? '▶' : 'Ⅱ';
-      toggleButton.setAttribute('aria-label', _replayPaused ? 'Resume replay' : 'Pause replay');
-      toggleButton.title = _replayPaused ? 'Resume replay' : 'Pause replay';
+      toggleButton.setAttribute('aria-label', _replayPaused ? 'Reprendre la lecture' : 'Mettre en pause la lecture');
+      toggleButton.title = _replayPaused ? 'Reprendre la lecture' : 'Mettre en pause la lecture';
     }
   }
 }
@@ -1956,13 +1956,13 @@ function syncReplayCountdownButton(state) {
   const transport = _missionPanel?.querySelector('[data-mission-replay-transport]');
   if (!transport || !_replayCameraLaunchId) return;
   const phase = state.countdownActive
-    ? `T minus ${state.countdownSeconds}`
+    ? `T moins ${state.countdownSeconds}`
     : state.preCountdownActive
-      ? 'Preparing launch site'
+      ? 'Préparation du site de lancement'
     : state.elapsedSinceStart < 1
-      ? 'Liftoff'
-      : state.ascending ? 'Ascent replay' : 'Orbit replay';
-  transport.setAttribute('aria-label', `${phase}${_replayPaused ? ', paused' : ''}`);
+      ? 'Décollage'
+      : state.ascending ? 'Relecture de l\'ascension' : 'Relecture de l\'orbite';
+  transport.setAttribute('aria-label', `${phase}${_replayPaused ? ', en pause' : ''}`);
 }
 
 function syncReplaySpeedControl() {
@@ -2216,7 +2216,7 @@ function normalizePayloadFlights(launch) {
     const payload = flight.payload || flight;
     return {
       id: String(flight.id || payload.id || `payload-${index}`),
-      name: payload.name || flight.name || 'Unnamed payload',
+      name: payload.name || flight.name || 'Charge utile sans nom',
       type: payload.type?.name || flight.type?.name || null,
       manufacturer: payload.manufacturer?.name || null,
       operator: payload.operator?.name || null,
@@ -2239,12 +2239,12 @@ function normalizeLanding(stage, fallbackName, category, index) {
   const success = landing?.success;
   const recoveryType = landing?.type?.name || null;
   const launcherStatus = launcher.status?.name || null;
-  const status = success === true ? 'RECOVERED'
-    : success === false ? 'LOST'
-      : attempted ? 'RECOVERY ATTEMPT'
+  const status = success === true ? 'RÉCUPÉRÉ'
+    : success === false ? 'PERDU'
+      : attempted ? 'TENTATIVE DE RÉCUPÉRATION'
         : recoveryType ? recoveryType.toUpperCase()
           : launcherStatus ? launcherStatus.toUpperCase()
-            : 'NO RECOVERY DATA';
+            : 'AUCUNE DONNÉE DE RÉCUPÉRATION';
   return {
     id: String(stage?.id || landing?.id || `${category}-${index}`),
     category,
@@ -2269,16 +2269,16 @@ function normalizeRecoveryStages(launch, payloads) {
   const launcherStages = Array.isArray(rocket.launcher_stage) ? rocket.launcher_stage : [];
   const spacecraftStages = Array.isArray(rocket.spacecraft_stage) ? rocket.spacecraft_stage : [];
   const stages = [
-    ...launcherStages.map((stage, index) => normalizeLanding(stage, `Launcher stage ${index + 1}`, 'LAUNCHER', index)),
-    ...spacecraftStages.map((stage, index) => normalizeLanding(stage, `Spacecraft stage ${index + 1}`, 'SPACECRAFT', index)),
+    ...launcherStages.map((stage, index) => normalizeLanding(stage, `Étage du lanceur ${index + 1}`, 'LAUNCHER', index)),
+    ...spacecraftStages.map((stage, index) => normalizeLanding(stage, `Étage du vaisseau spatial ${index + 1}`, 'SPACECRAFT', index)),
   ];
   const payloadFlights = rocket.payloads || launch.payloads || [];
   if (Array.isArray(payloadFlights)) {
     payloadFlights.forEach((flight, index) => {
       if (!flight?.landing) return;
       stages.push(normalizeLanding(
-        { ...flight, type: payloads[index]?.type || 'Payload', serial_number: payloads[index]?.name },
-        payloads[index]?.name || `Payload ${index + 1}`,
+        { ...flight, type: payloads[index]?.type || 'Charge utile', serial_number: payloads[index]?.name },
+        payloads[index]?.name || `Charge utile ${index + 1}`,
         'PAYLOAD',
         index,
       ));
@@ -2289,11 +2289,11 @@ function normalizeRecoveryStages(launch, payloads) {
 
 function landingEndpoint(stage, launch, insertionPosition) {
   if (Number.isFinite(stage.lat) && Number.isFinite(stage.lon)) {
-    return { lat: stage.lat, lon: stage.lon, accuracy: 'CONFIRMED' };
+    return { lat: stage.lat, lon: stage.lon, accuracy: 'CONFIRMÉ' };
   }
   const recoveryIdentity = `${stage.recoveryType || ''} ${stage.destination || ''}`.toLowerCase();
   if (/return to launch site|rtls|launch site|landing zone/.test(recoveryIdentity)) {
-    return { lat: launch.lat, lon: launch.lon, accuracy: 'PAD / RTLS' };
+    return { lat: launch.lat, lon: launch.lon, accuracy: 'SITE DE LANCEMENT / RTLS' };
   }
   if (!(stage.downrangeKm > 0) || !insertionPosition) return null;
   const ellipsoid = Cesium.Ellipsoid.WGS84;
@@ -2316,7 +2316,7 @@ function landingEndpoint(stage, launch, insertionPosition) {
   return {
     lat: Cesium.Math.toDegrees(lat),
     lon: Cesium.Math.toDegrees(Cesium.Math.negativePiToPi(lon)),
-    accuracy: 'EST. DOWNRANGE',
+    accuracy: 'EST. EN AVAL',
   };
 }
 
@@ -2378,7 +2378,7 @@ function renderMissionPanel() {
   setMissionPanelField('[data-mission-status]', launch.status);
   setMissionPanelField(
     '[data-mission-site]',
-    launch.launchSite && launch.launchSite !== 'Unknown launch site' ? launch.launchSite : null,
+    launch.launchSite && launch.launchSite !== 'Site de lancement inconnu' ? launch.launchSite : null,
   );
   setMissionPanelField('[data-mission-time]', launch.launchTime);
   const pathPresentation = missionPathPresentation(launch, _replayTracks.has(launch.id));
@@ -2391,26 +2391,26 @@ function renderMissionPanel() {
         payload.operator && payload.operator !== payload.manufacturer ? payload.operator : null,
         Number.isFinite(payload.massKg) ? `${payload.massKg.toLocaleString()} KG` : null,
       ].filter(Boolean).join(' · ');
-      return `<tr><td>${escapeMissionText(payload.name)}${payload.amount > 1 ? ` ×${payload.amount}` : ''}${detail ? `<small>${escapeMissionText(detail)}</small>` : ''}</td><td>${escapeMissionText(payload.type || 'UNSPECIFIED')}</td><td>${escapeMissionText(payload.destination || launch.orbit?.name || 'UNAVAILABLE')}</td></tr>`;
+      return `<tr><td>${escapeMissionText(payload.name)}${payload.amount > 1 ? ` ×${payload.amount}` : ''}${detail ? `<small>${escapeMissionText(detail)}</small>` : ''}</td><td>${escapeMissionText(payload.type || 'NON SPÉCIFIÉ')}</td><td>${escapeMissionText(payload.destination || launch.orbit?.name || 'INDISPONIBLE')}</td></tr>`;
     })
     : [];
   if (launch.payloads.length > 5) {
-    payloadRows.push(`<tr><td colspan="3" class="mission-table-empty">+${launch.payloads.length - 5} additional payload records</td></tr>`);
+    payloadRows.push(`<tr><td colspan="3" class="mission-table-empty">+${launch.payloads.length - 5} fiches de charge utile supplémentaires</td></tr>`);
   }
   _missionPanel.querySelector('[data-mission-payloads]').innerHTML = missionTableRows(
     payloadRows,
     3,
-    'PAYLOAD DATA UNAVAILABLE',
+    'DONNÉES DE CHARGE UTILE INDISPONIBLES',
   );
   const stageRows = launch.recoveryStages.map((stage) => {
     const endpoint = stage.endpoint;
-    const destination = stage.destination || (endpoint?.accuracy === 'PAD / RTLS' ? launch.launchSite : 'UNAVAILABLE');
+    const destination = stage.destination || (endpoint?.accuracy === 'SITE DE LANCEMENT / RTLS' ? launch.launchSite : 'INDISPONIBLE');
     const position = endpoint
       ? `${endpoint.lat.toFixed(2)}, ${endpoint.lon.toFixed(2)} · ${endpoint.accuracy}`
-      : stage.downrangeKm > 0 ? `${stage.downrangeKm.toLocaleString()} KM DOWNRANGE` : 'POSITION UNAVAILABLE';
+      : stage.downrangeKm > 0 ? `${stage.downrangeKm.toLocaleString()} KM EN AVAL` : 'POSITION INDISPONIBLE';
     const stageDetail = [
-      Number.isFinite(stage.flightNumber) ? `FLIGHT ${stage.flightNumber}` : null,
-      stage.reused ? 'REUSED' : null,
+      Number.isFinite(stage.flightNumber) ? `VOL ${stage.flightNumber}` : null,
+      stage.reused ? 'RÉUTILISÉ' : null,
       stage.recoveryType,
     ].filter(Boolean).join(' · ');
     return `<tr><td>${escapeMissionText(stage.name)}${stageDetail ? `<small>${escapeMissionText(stageDetail)}</small>` : ''}</td><td>${escapeMissionText(stage.status)}</td><td>${escapeMissionText(destination)}<small>${escapeMissionText(position)}</small></td></tr>`;
@@ -2418,7 +2418,7 @@ function renderMissionPanel() {
   _missionPanel.querySelector('[data-mission-stages]').innerHTML = missionTableRows(
     stageRows,
     3,
-    'NO STAGE RE-ENTRY / RECOVERY DATA',
+    'AUCUNE DONNÉE DE RENTRÉE / RÉCUPÉRATION D\'ÉTAGE',
   );
   const stageSection = _missionPanel.querySelector('[data-mission-stages-section]');
   if (stageSection) stageSection.hidden = stageRows.length === 0;
@@ -2435,13 +2435,13 @@ function renderMissionRoster() {
   if (!_missionRoster) return;
   const list = _missionRoster.querySelector('[data-mission-roster-list]');
   const count = _missionRoster.querySelector('[data-mission-roster-count]');
-  if (count) count.textContent = `${_launches.length} / 30D`;
+  if (count) count.textContent = `${_launches.length} / 30J`;
   if (!list) return;
   const focusSnapshot = captureMissionRosterFocus(list);
   _missionRosterPreviewOwnership?.reset();
   const entries = missionRosterEntries(_launches);
   if (!entries.length) {
-    list.innerHTML = '<div class="space-mission-roster-empty">NO MISSIONS AVAILABLE IN THE CURRENT 30-DAY WINDOW</div>';
+    list.innerHTML = '<div class="space-mission-roster-empty">AUCUNE MISSION DISPONIBLE DANS LA FENÊTRE DE 30 JOURS ACTUELLE</div>';
     restoreMissionRosterFocus(
       list,
       focusSnapshot,
@@ -2451,10 +2451,10 @@ function renderMissionRoster() {
   }
   list.innerHTML = entries.map(({ launch, index }) => {
     const color = missionMarkerColor(launch).toCssColorString();
-    const date = launch.launchTime?.slice(0, 10) || 'DATE UNAVAILABLE';
-    const provider = launch.provider || 'UNSPECIFIED OPERATOR';
+    const date = launch.launchTime?.slice(0, 10) || 'DATE INDISPONIBLE';
+    const provider = launch.provider || 'OPÉRATEUR NON SPÉCIFIÉ';
     const label = shortMissionLabel(launch.name, 27).toUpperCase();
-    return `<button type="button" class="space-mission-roster-item" data-mission-roster-index="${index}" data-mission-roster-id="${escapeMissionText(launch.id)}" aria-label="Select ${escapeMissionText(label)}"><span class="space-mission-roster-marker" style="--mission-roster-color:${color}" aria-hidden="true"></span><span class="space-mission-roster-copy"><strong>${escapeMissionText(label)}</strong><small>${escapeMissionText(provider)} · ${escapeMissionText(date)}</small></span><span class="space-mission-roster-chevron" aria-hidden="true">›</span></button>`;
+    return `<button type="button" class="space-mission-roster-item" data-mission-roster-index="${index}" data-mission-roster-id="${escapeMissionText(launch.id)}" aria-label="Sélectionner ${escapeMissionText(label)}"><span class="space-mission-roster-marker" style="--mission-roster-color:${color}" aria-hidden="true"></span><span class="space-mission-roster-copy"><strong>${escapeMissionText(label)}</strong><small>${escapeMissionText(provider)} · ${escapeMissionText(date)}</small></span><span class="space-mission-roster-chevron" aria-hidden="true">›</span></button>`;
   }).join('');
   list.querySelectorAll('[data-mission-roster-index]').forEach((button) => {
     const index = Number(button.dataset.missionRosterIndex);
@@ -2652,13 +2652,13 @@ function createMissionPanel() {
   _missionPanel = document.createElement('aside');
   _missionPanel.id = 'space-mission-panel';
   _missionPanel.className = 'context-space-mission-detail';
-  _missionPanel.setAttribute('aria-label', 'Selected Space Mission');
-  _missionPanel.innerHTML = `<div class="space-mission-view-header"><span>SELECTED SPACE MISSION</span><button type="button" data-mission-close title="Show all missions" aria-label="Deselect mission">×</button></div><div class="space-mission-detail"><strong data-mission-title>MISSION</strong><span data-mission-field data-mission-provider></span><span data-mission-field>STATUS · <b data-mission-status></b></span><span data-mission-field>LAUNCH SITE · <b data-mission-site></b></span><span data-mission-field>LAUNCH TIME · <b data-mission-time></b></span><span data-mission-field>ORBIT · <b data-mission-orbit></b></span><span>ASCENT PATH · <b data-mission-ascent-source></b></span><span data-mission-field>CURRENT DISTANCE FROM EARTH · <b data-mission-distance></b></span><span data-mission-field>SATELLITE SPEED · <b data-mission-speed></b></span></div><section class="mission-data-section"><h4>PAYLOAD</h4><div class="mission-table-scroll"><table class="mission-data-table"><thead><tr><th>NAME</th><th>TYPE</th><th>DESTINATION</th></tr></thead><tbody data-mission-payloads></tbody></table></div></section><section class="mission-data-section" data-mission-stages-section><h4>STAGE / RE-ENTRY / RECOVERY</h4><div class="mission-table-scroll"><table class="mission-data-table"><thead><tr><th>STAGE</th><th>STATUS</th><th>FINAL POSITION</th></tr></thead><tbody data-mission-stages></tbody></table></div></section><div class="mission-replay-speed-control"><div class="mission-replay-speed-header"><label for="space-mission-replay-speed">REPLAY SPEED</label><output class="gev-slider-value" for="space-mission-replay-speed" data-mission-replay-speed-output>1×</output></div><input id="space-mission-replay-speed" class="gev-quantitative-slider" type="range" min="0.25" max="4" step="0.25" value="1" data-mission-replay-speed aria-label="Replay speed multiplier"><div class="mission-replay-speed-scale" aria-hidden="true"><span>0.25×</span><span>1×</span><span>4×</span></div></div><div class="mission-action-row"><button type="button" class="mission-focus-button" data-mission-focus>FOCUS</button><button type="button" class="mission-replay-button" data-mission-replay aria-pressed="false">REPLAY ASCENT</button></div><div class="space-mission-nav"><button type="button" class="mission-nav-button" data-mission-prev title="Previous mission"><span aria-hidden="true">‹</span> PREV</button><span class="mission-nav-index" data-mission-index>—</span><button type="button" class="mission-nav-button" data-mission-next title="Next mission">NEXT <span aria-hidden="true">›</span></button></div><button type="button" class="panel-layer-toggle" data-mission-show-all>SHOW ALL / DESELECT</button>`;
+  _missionPanel.setAttribute('aria-label', 'Mission spatiale sélectionnée');
+  _missionPanel.innerHTML = `<div class="space-mission-view-header"><span>MISSION SPATIALE SÉLECTIONNÉE</span><button type="button" data-mission-close title="Afficher toutes les missions" aria-label="Désélectionner la mission">×</button></div><div class="space-mission-detail"><strong data-mission-title>MISSION</strong><span data-mission-field data-mission-provider></span><span data-mission-field>STATUT · <b data-mission-status></b></span><span data-mission-field>SITE DE LANCEMENT · <b data-mission-site></b></span><span data-mission-field>HEURE DE LANCEMENT · <b data-mission-time></b></span><span data-mission-field>ORBITE · <b data-mission-orbit></b></span><span>TRAJECTOIRE D'ASCENSION · <b data-mission-ascent-source></b></span><span data-mission-field>DISTANCE ACTUELLE DE LA TERRE · <b data-mission-distance></b></span><span data-mission-field>VITESSE DU SATELLITE · <b data-mission-speed></b></span></div><section class="mission-data-section"><h4>CHARGE UTILE</h4><div class="mission-table-scroll"><table class="mission-data-table"><thead><tr><th>NOM</th><th>TYPE</th><th>DESTINATION</th></tr></thead><tbody data-mission-payloads></tbody></table></div></section><section class="mission-data-section" data-mission-stages-section><h4>ÉTAGE / RENTRÉE / RÉCUPÉRATION</h4><div class="mission-table-scroll"><table class="mission-data-table"><thead><tr><th>ÉTAGE</th><th>STATUT</th><th>POSITION FINALE</th></tr></thead><tbody data-mission-stages></tbody></table></div></section><div class="mission-replay-speed-control"><div class="mission-replay-speed-header"><label for="space-mission-replay-speed">VITESSE DE LECTURE</label><output class="gev-slider-value" for="space-mission-replay-speed" data-mission-replay-speed-output>1×</output></div><input id="space-mission-replay-speed" class="gev-quantitative-slider" type="range" min="0.25" max="4" step="0.25" value="1" data-mission-replay-speed aria-label="Multiplicateur de vitesse de lecture"><div class="mission-replay-speed-scale" aria-hidden="true"><span>0.25×</span><span>1×</span><span>4×</span></div></div><div class="mission-action-row"><button type="button" class="mission-focus-button" data-mission-focus>FOCUS</button><button type="button" class="mission-replay-button" data-mission-replay aria-pressed="false">REJOUER L'ASCENSION</button></div><div class="space-mission-nav"><button type="button" class="mission-nav-button" data-mission-prev title="Mission précédente"><span aria-hidden="true">‹</span> PRÉC</button><span class="mission-nav-index" data-mission-index>—</span><button type="button" class="mission-nav-button" data-mission-next title="Mission suivante">SUIVANT <span aria-hidden="true">›</span></button></div><button type="button" class="panel-layer-toggle" data-mission-show-all>TOUT AFFICHER / DÉSÉLECTIONNER</button>`;
   _missionPanel.querySelector('.mission-action-row').insertAdjacentHTML(
     'beforeend',
     `<div class="mission-replay-transport" data-mission-replay-transport hidden>
-      <button type="button" data-mission-replay-toggle title="Pause replay" aria-label="Pause replay">Ⅱ</button>
-      <button type="button" class="cancel" data-mission-replay-cancel title="Cancel replay" aria-label="Cancel replay"><span aria-hidden="true">×</span></button>
+      <button type="button" data-mission-replay-toggle title="Mettre en pause la lecture" aria-label="Mettre en pause la lecture">Ⅱ</button>
+      <button type="button" class="cancel" data-mission-replay-cancel title="Annuler la lecture" aria-label="Annuler la lecture"><span aria-hidden="true">×</span></button>
     </div>`,
   );
   host.appendChild(_missionPanel);
@@ -2799,26 +2799,26 @@ function updateReplayVehicleOverlay(occluder) {
   const mission = shortMissionLabel(launch.name, 22).toUpperCase();
   const siteName = compactLaunchSiteName(launch.launchSite);
   const siteCallout = siteName
-    ? `LAUNCH SITE · ${shortMissionLabel(siteName, 20).toUpperCase()}`
-    : 'LAUNCH SITE';
+    ? `SITE DE LANCEMENT · ${shortMissionLabel(siteName, 20).toUpperCase()}`
+    : 'SITE DE LANCEMENT';
   let title = mission;
   let detail = siteCallout;
   if (mode === 'countdown') {
     title = `T−${String(state.countdownSeconds).padStart(2, '0')} · ${mission}`;
-    detail = `LAUNCH STANDBY\n${siteCallout}`;
+    detail = `EN ATTENTE DE LANCEMENT\n${siteCallout}`;
   } else if (mode === 'ascent') {
     title = state.elapsedSinceStart < 1
-      ? `LIFTOFF · ${mission}`
-      : `${launch.trajectory.length > 1 ? 'ASCENT REPLAY' : 'ASCENT ESTIMATE'} · ${mission}`;
+      ? `DÉCOLLAGE · ${mission}`
+      : `${launch.trajectory.length > 1 ? 'RELECTURE DE L\'ASCENSION' : 'ESTIMATION DE L\'ASCENSION'} · ${mission}`;
     detail = formatMissionEventTime(state.eventTime);
   } else if (mode === 'recovery') {
-    title = `STAGE RE-ENTRY / RECOVERY · ${mission}`;
+    title = `RENTRÉE / RÉCUPÉRATION D'ÉTAGE · ${mission}`;
     detail = formatMissionEventTime(state.eventTime);
   } else if (mode === 'orbit') {
-    title = `ORBIT REPLAY · ${mission}`;
+    title = `RELECTURE DE L'ORBITE · ${mission}`;
     detail = formatMissionEventTime(state.eventTime);
   }
-  if (_replayPaused) title = `PAUSED · ${title}`;
+  if (_replayPaused) title = `EN PAUSE · ${title}`;
   const nextText = `${title}\n${detail}`;
   if (nextText !== _replayVehicleOverlayText) {
     _replayVehicleOverlayText = nextText;
@@ -2921,10 +2921,10 @@ export function normalizeRocketLaunches(payload, now = new Date()) {
     const payloads = normalizePayloadFlights(launch);
     return {
       id: String(launch.id || launch.slug || launch.name || `launch-${date}`),
-      name: launch.name || 'Unnamed launch',
-      status: launch.status?.name || 'Unknown',
+      name: launch.name || 'Lancement sans nom',
+      status: launch.status?.name || 'Inconnu',
       launchTime: Number.isFinite(date) ? new Date(date).toISOString() : null,
-      launchSite: pad.name || location.name || 'Unknown launch site',
+      launchSite: pad.name || location.name || 'Site de lancement inconnu',
       lat: Number.isFinite(lat) ? lat : null,
       lon: Number.isFinite(lon) ? lon : null,
       provider: launch.launch_service_provider?.name || null,
@@ -2936,7 +2936,7 @@ export function normalizeRocketLaunches(payload, now = new Date()) {
       trajectory: Array.isArray(launch.trajectory) ? launch.trajectory : [],
       timeline: Array.isArray(launch.timeline)
         ? launch.timeline.map((event) => ({
-          name: event.type?.abbrev || event.type?.name || event.name || 'Mission event',
+          name: event.type?.abbrev || event.type?.name || event.name || 'Événement de mission',
           relativeTime: event.relative_time || event.relativeTime || null,
           offsetSeconds: parseMissionDurationSeconds(event.relative_time || event.relativeTime),
         }))
@@ -3166,7 +3166,7 @@ function addLaunchEntity(launch, activeTleText = _activeTleText) {
           createRocketMissionElementOverlayEntry({
             id: `reentry:${launch.id}:${stageIndex}`,
             position: reentryPosition,
-            text: 'STAGE RE-ENTRY',
+            text: 'RENTRÉE D\'ÉTAGE',
             accent: '#ffd166',
             priority: 700_000 - stageIndex,
             gapPx: 8,
@@ -3266,7 +3266,7 @@ function addLaunchEntity(launch, activeTleText = _activeTleText) {
     overlayRecord.elementEntryFactories.push(() => {
       const name = satelliteTrack
         ? shortMissionLabel(satelliteTrack.name, 22).toUpperCase()
-        : 'EST. ORBIT POSITION';
+        : 'POSITION ORBITALE EST.';
       return createRocketMissionElementOverlayEntry({
         id: `payload-position:${launch.id}`,
         position: () => livePosition,
@@ -3317,7 +3317,7 @@ function addLaunchEntity(launch, activeTleText = _activeTleText) {
       createRocketMissionElementOverlayEntry({
         id: `orbit:${launch.id}`,
         position: orbitLabelPosition,
-        text: satelliteTrack ? 'ORBIT' : 'PROJECTED ORBIT',
+        text: satelliteTrack ? 'ORBITE' : 'ORBITE PROJETÉE',
         accent: satelliteTrack ? '#22e6e6' : '#c084fc',
         priority: 800_000,
         gapPx: 8,
@@ -3439,7 +3439,7 @@ async function captureSatelliteDependency() {
       && _enabled
       && (activated === false || !_dataManager.isEnabled('satellites'))
     ) {
-      throw new Error('Space Missions requires the satellites layer, which failed to start');
+      throw new Error('Missions spatiales nécessite la couche satellites, qui n\'a pas démarré');
     }
   } finally {
     if (token === _lifecycleToken && _satelliteActivationPromise === activation) {
@@ -3462,7 +3462,7 @@ async function restoreSatelliteDependency() {
     restored === false
     || _dataManager.isEnabled('satellites') !== snapshot.enabled
   ) {
-    throw new Error('Space Missions could not restore the satellites layer');
+    throw new Error('Missions spatiales n\'a pas pu restaurer la couche satellites');
   }
 }
 
@@ -3531,7 +3531,7 @@ function requestMissionUpdate() {
 
 const rocketLaunchesLayer = {
   id: 'rocket-launches',
-  name: 'Space Missions (30d)',
+  name: 'Missions spatiales (30j)',
   icon: '🚀',
   source: 'Launch Library 2',
   updateInterval: 300000,

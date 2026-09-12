@@ -65,7 +65,7 @@ export function mergeContextTransitionErrors(primaryError, secondaryError) {
 export async function settleUserFacingContextAction({ operation, onFailure, falseIsFailure = true }) {
   try {
     const result = await operation();
-    if (falseIsFailure && result === false) throw new Error('Context transition did not complete');
+    if (falseIsFailure && result === false) throw new Error('La transition du Contexte ne s\'est pas terminée');
     return result;
   } catch (error) {
     try {
@@ -284,8 +284,8 @@ export function contextLayerEnableBlockReason({ contextMode, change, layerName =
   ) {
     return null;
   }
-  const label = String(layerName || change.layerId || 'that layer');
-  return `Space Missions isolates replay data. Exit the mode to enable ${label}.`;
+  const label = String(layerName || change.layerId || 'cette couche');
+  return `Missions spatiales isole les données de relecture. Quittez le mode pour activer ${label}.`;
 }
 
 /**

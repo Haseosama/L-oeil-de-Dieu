@@ -12,8 +12,8 @@ import { keySetupRequirement } from './keySetupCore.mjs';
  * @returns {string}
  */
 export function photorealUnavailableReason(hasCredentials) {
-  if (hasCredentials) return 'Google 3D tiles unavailable — check the key\'s API restrictions, quota, or network';
-  return `${keySetupRequirement('google-maps')} — or a Cesium ion token for the ion-hosted route`;
+  if (hasCredentials) return 'Tuiles Google 3D indisponibles — vérifiez les restrictions API, le quota ou le réseau de la clé';
+  return `${keySetupRequirement('google-maps')} — ou un jeton Cesium ion pour la voie hébergée par ion`;
 }
 
 export const MAP_STACKS = [
@@ -157,7 +157,7 @@ export class MapStackController {
   _unavailableReason(stack) {
     if (stack?.requiresIon) return keySetupRequirement('cesium-ion');
     if (stack?.kind === 'photoreal') return photorealUnavailableReason(this._hasPhotorealCredentials());
-    return `${stack?.label || 'This map stack'} is unavailable`;
+    return `${stack?.label || 'Cette source cartographique'} n'est pas disponible`;
   }
 
   /** A direct Google key or an ion token is enough to attempt Google 3D. */
@@ -360,7 +360,7 @@ export class MapStackController {
           credit: DEFAULT_OSM_CREDIT,
         });
         effectiveStackId = 'osm';
-        fallbackMessage = 'Esri Satellite is unavailable; using OSM';
+        fallbackMessage = 'Esri Satellite est indisponible ; utilisation d\'OSM';
       }
     } else if (stack.kind === 'osm') {
       provider = new Cesium.OpenStreetMapImageryProvider({
@@ -397,7 +397,7 @@ export class MapStackController {
         : failures + 1;
       if (failures < 2 || this._esriFallbackPending) return;
       this._esriFallbackPending = true;
-      const message = 'Esri Satellite tile requests failed; using OSM';
+      const message = 'Les requêtes de tuiles Esri Satellite ont échoué ; utilisation d\'OSM';
       this._onError?.(message, this.getStack('esri-imagery'));
       void this.setStack('osm', { silent: true }).then((state) => {
         if (state?.activeId === 'osm') {

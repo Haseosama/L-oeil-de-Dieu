@@ -1059,28 +1059,28 @@ function _deriveOpenSkyAuthError({ detail, authMode, authReason }) {
   const mode = _toLowerText(authMode);
 
   if (reason === 'oauth_invalid_or_missing') {
-    return 'OpenSky OAuth client missing/invalid';
+    return 'Client OAuth OpenSky manquant/invalide';
   }
   if (reason === 'oauth_invalid_credentials') {
-    return 'OpenSky OAuth rejected credentials';
+    return 'OpenSky OAuth a rejeté les identifiants';
   }
   if (reason === 'basic_invalid_credentials') {
-    return 'OpenSky username/password rejected';
+    return 'Nom d\'utilisateur/mot de passe OpenSky rejetés';
   }
   if (reason === 'missing_basic_creds' || reason === 'missing_oauth_and_basic_creds') {
-    return 'OpenSky auth missing';
+    return 'Authentification OpenSky manquante';
   }
   if (reason === 'auth_required') {
-    return 'OpenSky auth required';
+    return 'Authentification OpenSky requise';
   }
   if (reason.startsWith('oauth_') || reason.startsWith('basic_')) {
-    return 'OpenSky auth invalid';
+    return 'Authentification OpenSky invalide';
   }
   if (reason === 'forced_anonymous' || mode === 'anon') {
-    return 'OpenSky auth required';
+    return 'Authentification OpenSky requise';
   }
   if (detail) return detail;
-  return 'OpenSky auth failed';
+  return 'Échec de l\'authentification OpenSky';
 }
 
 /**
@@ -3880,7 +3880,7 @@ function _focusEvidenceSnapshot() {
  */
 const flightsLayer = {
   id: 'flights',
-  name: 'Live Flights',
+  name: 'Vols en direct',
   icon: '✈️',
   source: 'OpenSky Network',
   // Browser-harness seam: isolates synthetic display-floor scenarios without
@@ -4623,7 +4623,7 @@ const flightsLayer = {
       console.warn('[Data:Flights] Fetch error:', e);
       _backoff = true;
       _retryAt = Date.now() + ERROR_BACKOFF_INTERVAL;
-      _lastError = 'OpenSky network error';
+      _lastError = 'Erreur réseau OpenSky';
     } finally {
       _activeUpdateControllers.delete(resourceController);
     }
@@ -5076,7 +5076,7 @@ const flightsLayer = {
     if (outcome.status !== 'accepted') {
       return {
         status: 'source-unavailable',
-        reason: 'OpenSky snapshot unavailable',
+        reason: 'Instantané OpenSky indisponible',
         refreshEpoch: outcome.epoch,
         source: outcome.source,
         coverage: outcome.coverage,

@@ -72,21 +72,21 @@ export function classifyAisFailure(input = {}) {
   }
 
   if (status === 401 || status === 403) {
-    return { kind: 'auth', message: `AISStream rejected the API key (HTTP ${status})` };
+    return { kind: 'auth', message: `AISStream a rejeté la clé API (HTTP ${status})` };
   }
   if (status === 429) {
     return {
       kind: 'rate-limit',
-      message: 'AISStream rate-limited this key (HTTP 429)',
+      message: 'AISStream a limité le débit de cette clé (HTTP 429)',
       retryAfterMs: fromHeader(),
     };
   }
   if (Number.isFinite(status) && status >= 400) {
-    return { kind: 'transport', message: `AISStream upgrade failed (HTTP ${status})` };
+    return { kind: 'transport', message: `Échec de la mise à niveau AISStream (HTTP ${status})` };
   }
   if (AUTH_TEXT.test(text)) return { kind: 'auth', message: text };
   if (RATE_TEXT.test(text)) return { kind: 'rate-limit', message: text, retryAfterMs: fromHeader() };
-  return { kind: 'transport', message: text || 'AISStream websocket error' };
+  return { kind: 'transport', message: text || 'Erreur websocket AISStream' };
 }
 
 /**

@@ -6,7 +6,7 @@ export const animeShader = {
   name: 'anime',
   uniforms: {
     saturation: { default: 1.0, min: 0, max: 2, label: 'Saturation' },
-    edgeThick: { default: 0.5, min: 0, max: 1, label: 'Edge Thickness' },
+    edgeThick: { default: 0.5, min: 0, max: 1, label: 'Épaisseur des contours' },
   },
   fragmentShader: /* glsl */ `
     uniform sampler2D colorTexture;

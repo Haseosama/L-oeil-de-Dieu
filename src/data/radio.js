@@ -1329,7 +1329,7 @@ function installAudio({ replace = false } = {}) {
     const attempt = _activePlaybackAttempt;
     if (tryRadioFallback(failedId, attempt?.origin, attempt?.id)) return;
     _audioState = 'error';
-    _audioError = 'Broadcaster stream is unavailable or blocked by the browser.';
+    _audioError = 'Le flux du diffuseur est indisponible ou bloqué par le navigateur.';
     emitState();
   });
 }
@@ -1819,8 +1819,8 @@ export async function playSelectedRadio({ origin = 'programmatic', attemptId = n
     if (tryRadioFallback(station.id, origin, ownedAttemptId)) return false;
     _audioState = 'error';
     _audioError = error?.name === 'NotAllowedError'
-      ? 'Playback requires a direct click or tap.'
-      : 'Broadcaster stream could not be started.';
+      ? 'La lecture nécessite un clic ou un appui direct.'
+      : 'Le flux du diffuseur n\'a pas pu démarrer.';
     emitState();
     return false;
   }
@@ -2763,8 +2763,8 @@ export const radioLayer = {
         _sessionGeneration,
       )) return;
       _error = _stations.length
-        ? 'Directory refresh failed; showing the previous station catalog.'
-        : 'Radio directory is temporarily unavailable.';
+        ? 'Échec de l\'actualisation de l\'annuaire ; affichage du catalogue de stations précédent.'
+        : 'L\'annuaire radio est temporairement indisponible.';
       _stale = _stations.length > 0;
       _degraded = _stations.length > 0;
     } finally {

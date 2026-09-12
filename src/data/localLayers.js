@@ -13,7 +13,7 @@ import damsUrl from './local_data/dams/dams.geojsonl?url';
 const datacenters = createLocalGeoJsonLayer({
   id: 'local-datacenters',
   url: datacentersUrl,
-  name: 'Datacenters',
+  name: 'Centres de données',
   color: '#00ffff', // Cyan
   icon: '▣',
   source: 'Local',
@@ -25,7 +25,7 @@ const datacenters = createLocalGeoJsonLayer({
 const dams = createLocalGeoJsonLayer({
   id: 'local-dams',
   url: damsUrl,
-  name: 'Dams',
+  name: 'Barrages',
   color: '#0088ff', // Blue
   icon: '▰',
   source: 'USACE',
@@ -39,7 +39,7 @@ const dams = createLocalGeoJsonLayer({
 // but the data is NOT bundled anymore — it needs FIRMS_MAP_KEY server-side.
 const fires = createFirmsHeatmapLayer({
   id: 'local-firms',
-  name: 'FIRMS Active Fires',
+  name: 'Feux actifs FIRMS',
   icon: '▲',
   source: 'NASA FIRMS · LIVE',
 });

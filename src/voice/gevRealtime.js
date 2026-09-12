@@ -14,10 +14,10 @@ const TOKEN_URL = '/api/realtime/token';
 const REALTIME_CALLS_URL = 'https://api.openai.com/v1/realtime/calls';
 const STATUS = {
   idle: 'OFF',
-  connecting: 'CONNECTING',
-  listening: 'LISTENING',
-  executing: 'EXECUTING',
-  error: 'ERROR',
+  connecting: 'CONNEXION',
+  listening: 'ÉCOUTE',
+  executing: 'EXÉCUTION',
+  error: 'ERREUR',
 };
 const CALL_DEDUPE_MS = 2500;
 export const PUSH_TO_TALK_HOLD_DELAY_MS = 500;
@@ -349,7 +349,7 @@ export class GevRealtimeController {
     this.pushToTalkKeyHeld = pushToTalkKeyHeld;
     this.spaceKeyHeld = spaceKeyHeld;
     if (!window.RTCPeerConnection || !navigator.mediaDevices?.getUserMedia) {
-      this.setStatus('error', 'WebRTC microphone support unavailable');
+      this.setStatus('error', 'Prise en charge du microphone WebRTC indisponible');
       return;
     }
 
@@ -371,7 +371,7 @@ export class GevRealtimeController {
       limits: this.voiceLimits,
     });
     this.syncCostUi();
-    this.setStatus('connecting', 'Requesting microphone');
+    this.setStatus('connecting', 'Demande d’accès au microphone');
     this.debugLog('session.starting', {
       epoch,
       tier: this.voiceTier,
@@ -436,11 +436,11 @@ export class GevRealtimeController {
       this.pc.onconnectionstatechange = () => this.handleConnectionStateChange();
       this.pc.oniceconnectionstatechange = () => {
         if (this.pc?.iceConnectionState === 'failed') {
-          this.fatalError('ICE connection', null, this.connectionDiagnostics());
+          this.fatalError('Connexion ICE', null, this.connectionDiagnostics());
         }
       };
       this.pc.onicecandidateerror = (event) => {
-        this.reportError('ICE candidate', event, {
+        this.reportError('Candidat ICE', event, {
           errorCode: event.errorCode,
           errorText: event.errorText,
           address: event.address,
@@ -455,8 +455,8 @@ export class GevRealtimeController {
       this.dc = dataChannel;
       dataChannel.addEventListener('open', () => {
         const detail = this.pushToTalkMode
-          ? (this.pushToTalkKeyHeld ? 'Release Space to send' : 'Hold Space to talk')
-          : 'Ask or command';
+          ? (this.pushToTalkKeyHeld ? 'Relâcher Espace pour envoyer' : 'Maintenir Espace pour parler')
+          : 'Posez une question ou donnez un ordre';
         this.setStatus('listening', detail);
         this.debugLog('data_channel.open', { connection: this.connectionDiagnostics(dataChannel) });
       });
@@ -465,12 +465,12 @@ export class GevRealtimeController {
         // Skip if we're mid-teardown (the close we triggered) — otherwise a real
         // channel error tears the session down so the mic doesn't stay live (H8).
         if (this._tearingDown || this.dc !== dataChannel) return;
-        this.fatalError('Realtime data channel', event, this.connectionDiagnostics(dataChannel));
+        this.fatalError('Canal de données Realtime', event, this.connectionDiagnostics(dataChannel));
       });
       dataChannel.addEventListener('close', () => {
         if (this._tearingDown) return;
         if (this.dc === dataChannel && this.status !== 'idle' && this.status !== 'error') {
-          this.fatalError('Realtime data channel closed', null, this.connectionDiagnostics(dataChannel));
+          this.fatalError('Canal de données Realtime fermé', null, this.connectionDiagnostics(dataChannel));
         }
       });
 
@@ -492,7 +492,7 @@ export class GevRealtimeController {
       if (this.abandonStart(epoch, { localStream, localPc })) return;
       if (!sdpResponse.ok) {
         const body = await sdpResponse.text().catch(() => '');
-        throw new Error(`Realtime SDP failed: HTTP ${sdpResponse.status}${body ? ` - ${compactText(body, 240)}` : ''}`);
+        throw new Error(`Échec SDP Realtime : HTTP ${sdpResponse.status}${body ? ` - ${compactText(body, 240)}` : ''}`);
       }
       const answerSdp = await sdpResponse.text();
       if (this.abandonStart(epoch, { localStream, localPc })) return;
@@ -512,7 +512,7 @@ export class GevRealtimeController {
       }
       const diagnostics = this.connectionDiagnostics();
       this.stop({ preserveStatus: true });
-      this.reportError('Realtime connection', error, diagnostics);
+      this.reportError('Connexion Realtime', error, diagnostics);
     }
   }
 
@@ -543,7 +543,7 @@ export class GevRealtimeController {
   handleConnectionStateChange() {
     const state = this.pc?.connectionState;
     if (state === 'failed') {
-      this.fatalError('WebRTC connection', null, this.connectionDiagnostics());
+      this.fatalError('Connexion WebRTC', null, this.connectionDiagnostics());
       return;
     }
     if (state === 'disconnected') {
@@ -556,7 +556,7 @@ export class GevRealtimeController {
         this.disconnectGraceTimer = null;
         // Still not recovered after the grace window → treat as a real drop.
         if (this.pc?.connectionState === 'disconnected') {
-          this.fatalError('WebRTC connection lost', null, this.connectionDiagnostics());
+          this.fatalError('Connexion WebRTC perdue', null, this.connectionDiagnostics());
         }
       }, DISCONNECT_GRACE_MS);
       return;
@@ -627,7 +627,7 @@ export class GevRealtimeController {
         if (this.isActive()) {
           this.ui.root.dataset.pushToTalk = 'held';
           this.setMicrophoneEnabled(true);
-          if (this.status === 'listening') this.setStatus('listening', 'Release Space to send');
+          if (this.status === 'listening') this.setStatus('listening', 'Relâcher Espace pour envoyer');
         } else {
           this.start({ pushToTalk: true });
           // start() performs a controlled stop() before connecting. Restore the
@@ -695,7 +695,7 @@ export class GevRealtimeController {
     delete this.ui.root.dataset.pushToTalk;
     if (!this.pushToTalkMode) return;
     this.setMicrophoneEnabled(false);
-    if (this.status === 'listening') this.setStatus('listening', 'Hold Space to talk');
+    if (this.status === 'listening') this.setStatus('listening', 'Maintenir Espace pour parler');
     else this.updateVoiceButtonLabel();
   }
 
@@ -955,7 +955,7 @@ export class GevRealtimeController {
       this.ui.root.remove();
     }
     if (!preserveStatus && !removeUi) {
-      this.setStatus('idle', 'Voice off');
+      this.setStatus('idle', 'Voix désactivée');
     }
     this.setRadioVoiceDucking(false);
   }
@@ -1092,7 +1092,7 @@ export class GevRealtimeController {
           eventId: payload.event_id,
           activeResponseMessage: payload.error?.message || null,
         });
-        this.setStatus('listening', 'Ask or command');
+        this.setStatus('listening', 'Posez une question ou donnez un ordre');
         return;
       }
       // A conversation.item.delete for a stale viewport screenshot can land
@@ -1114,7 +1114,7 @@ export class GevRealtimeController {
       this.pendingResponseInstructions = null;
       this.pendingUserTextResponse = false;
       this.cancelRadioHandoff({ abortTools: true });
-      this.reportError('Realtime API', payload.error, {
+      this.reportError('API Realtime', payload.error, {
         eventId: payload.event_id,
         type: payload.error?.type,
         code: payload.error?.code,
@@ -1206,7 +1206,7 @@ export class GevRealtimeController {
       return;
     }
 
-    this.setStatus('executing', 'Running command');
+    this.setStatus('executing', 'Exécution de la commande');
     this.pruneProcessedCalls();
     let sentOutput = false;
     let lastResult = null;
@@ -1422,7 +1422,7 @@ export class GevRealtimeController {
         this.pendingRadioPlaybackResult || lastResult,
       ));
     }
-    this.setStatus('listening', 'Ask or command');
+    this.setStatus('listening', 'Posez une question ou donnez un ordre');
   }
 
   sendToolOutput(callId, result) {
@@ -1506,16 +1506,16 @@ export class GevRealtimeController {
     this.updateVoiceButtonLabel();
     this.ui.status.textContent = STATUS[status] || STATUS.idle;
     const resolvedDetail = status === 'listening' && this.pushToTalkMode
-      ? (this.pushToTalkKeyHeld ? 'Release Space to send' : 'Hold Space to talk')
+      ? (this.pushToTalkKeyHeld ? 'Relâcher Espace pour envoyer' : 'Maintenir Espace pour parler')
       : detail;
     const primaryDetail = status === 'error'
-      ? 'VOICE UNAVAILABLE'
-      : (resolvedDetail || (status === 'idle' ? 'VOICE STANDBY' : 'VOICE ACTIVE'));
+      ? 'VOIX INDISPONIBLE'
+      : (resolvedDetail || (status === 'idle' ? 'VOIX EN VEILLE' : 'VOIX ACTIVE'));
     this.ui.detail.textContent = primaryDetail;
     this.ui.detail.title = primaryDetail;
     if (this.ui.errorDetail) {
       this.ui.errorDetail.textContent = status === 'error'
-        ? (resolvedDetail || 'Voice session could not be started.')
+        ? (resolvedDetail || 'Impossible de démarrer la session vocale.')
         : '';
     }
     if (status === 'idle' || status === 'connecting' || status === 'error') {
@@ -1532,7 +1532,7 @@ export class GevRealtimeController {
    */
   updateVoiceButtonLabel() {
     if (!this.ui.buttonLabel) return;
-    this.ui.buttonLabel.textContent = 'MIC';
+    this.ui.buttonLabel.textContent = 'MICRO';
     if (this.ui.helpDetail) {
       this.ui.helpDetail.textContent = resolveVoiceControlHint(
         this.pushToTalkMode,
@@ -1687,7 +1687,7 @@ export class GevRealtimeController {
     this.debugLog('tool.radio_handoff', { result: radioHandoff.result });
     if (radioHandoff.result?.ok || radioHandoff.cancelled || !stillCurrent) return;
     if (this.dc?.readyState === 'open' && !this.userTurnPending) {
-      this.setStatus('listening', 'Radio did not start');
+      this.setStatus('listening', 'La radio n’a pas démarré');
       this.queueResponseCreate('Say exactly one short correction: “The Radio station could not start. Voice is still on.”');
     }
   }
@@ -1847,17 +1847,17 @@ export class GevRealtimeController {
       this.ui.tierButton.setAttribute('aria-pressed', isMini ? 'true' : 'false');
       const pendingId = resolveVoiceModel(pendingTier).id;
       this.ui.tierButton.title = this.isActive() && state.modelId !== pendingId
-        ? `Next session: ${pendingId} — this session stays on ${state.modelId}`
-        : `Voice model: ${pendingId} — click to switch to ${
+        ? `Prochaine session : ${pendingId} — cette session reste sur ${state.modelId}`
+        : `Modèle vocal : ${pendingId} — cliquer pour passer en ${
           isMini ? 'standard' : 'mini'
-        }; applies next session`;
+        } ; s’applique à la prochaine session`;
     }
     if (this.ui?.costValue) {
       this.ui.costValue.textContent = state.display;
       this.ui.costValue.dataset.level = state.level;
       this.ui.costValue.title =
-        `Estimated session cost on ${state.modelId} — ${state.responses} response(s). ` +
-        `Warns at ${formatCostUsd(state.warnUsd)}, ends the session at ${formatCostUsd(state.capUsd)}.`
+        `Coût estimé de la session sur ${state.modelId} — ${state.responses} réponse(s). ` +
+        `Avertit à ${formatCostUsd(state.warnUsd)}, met fin à la session à ${formatCostUsd(state.capUsd)}.`
         + (state.note ? ` ${state.note}` : '');
     }
   }
@@ -1899,7 +1899,7 @@ export class GevRealtimeController {
     }
     this.syncCostUi();
     if (this.isActive() && this.ui?.detail) {
-      this.setStatus(this.status, `${this.voiceTier.toUpperCase()} applies next session`);
+      this.setStatus(this.status, `${this.voiceTier.toUpperCase()} s’appliquera à la prochaine session`);
     }
     return this.voiceTier;
   }
@@ -1976,7 +1976,7 @@ export class GevRealtimeController {
     try {
       this.stop({ preserveStatus: true });
     } finally {
-      this.setStatus('idle', `Session ended — cost cap ${state.display}`);
+      this.setStatus('idle', `Session terminée — plafond de coût atteint ${state.display}`);
       this.syncCostUi();
     }
   }
@@ -2008,7 +2008,7 @@ export class GevRealtimeController {
       if (responseStatus === 'failed') {
         const details = payload.response?.status_details || null;
         const failErr = details?.error || null;
-        this.reportError('Realtime response failed', failErr, {
+        this.reportError('Échec de la réponse Realtime', failErr, {
           responseId: payload.response?.id || payload.response_id || null,
           statusReason: details?.reason || null,
           type: failErr?.type || null,
@@ -2019,7 +2019,7 @@ export class GevRealtimeController {
         // connection is still live. Recover to listening so the user can retry
         // (mirrors the transient-blip philosophy, H8).
         if (this.dc?.readyState === 'open') {
-          this.setStatus('listening', 'Ask or command');
+          this.setStatus('listening', 'Posez une question ou donnez un ordre');
         }
       }
       if (!this.pendingRadioPlaybackResult) {
@@ -2393,10 +2393,10 @@ async function fetchRealtimeToken(tier = DEFAULT_VOICE_TIER) {
     const reason = typeof data?.error === 'string'
       ? data.error
       : data?.error?.message;
-    throw new Error(reason || `Realtime token failed: HTTP ${response.status}`);
+    throw new Error(reason || `Échec du jeton Realtime : HTTP ${response.status}`);
   }
   const token = data?.value || data?.client_secret?.value || data?.client_secret;
-  if (!token) throw new Error('Realtime token response did not include a client secret');
+  if (!token) throw new Error('La réponse du jeton Realtime ne contenait pas de secret client');
   return { token, model: servedModel, tier: servedTier };
 }
 
@@ -2460,7 +2460,7 @@ function createErrorRecord(source, error, extra = {}) {
     timestamp: new Date().toISOString(),
     source,
     name: rtcError?.name || null,
-    message: rtcError?.message || extra.errorText || String(error?.message || '').trim() || 'No browser error message supplied',
+    message: rtcError?.message || extra.errorText || String(error?.message || '').trim() || 'Aucun message d’erreur du navigateur fourni',
     errorDetail: rtcError?.errorDetail || null,
     sctpCauseCode: rtcError?.sctpCauseCode ?? null,
     receivedAlert: rtcError?.receivedAlert ?? null,
@@ -2633,8 +2633,8 @@ export function resolveVoiceVisualizerSpeaker(currentSpeaker, nextSpeaker, keepC
  */
 export function resolveVoiceControlHint(pushToTalkMode, pushToTalkKeyHeld) {
   return pushToTalkMode && pushToTalkKeyHeld
-    ? 'Release Space to send'
-    : 'Hold Space to speak · tap Space to activate focused controls';
+    ? 'Relâcher Espace pour envoyer'
+    : 'Maintenir Espace pour parler · appuyer sur Espace pour activer les contrôles en focus';
 }
 
 /**
@@ -2676,14 +2676,14 @@ function createVoiceControl({ reset = false } = {}) {
     root.dataset.speaker = 'idle';
     root.innerHTML = `
       <div class="gev-voice-heading">
-        <div class="gev-voice-kicker">AI AGENT</div>
+        <div class="gev-voice-kicker">AGENT IA</div>
         <div id="gev-voice-status">OFF</div>
         <div class="gev-voice-cost">
-          <button id="gev-voice-tier" class="gev-voice-tier-btn" type="button" aria-pressed="false" title="Voice model tier — applies next session">STD</button>
-          <span id="gev-voice-cost-value" class="gev-voice-cost-value" data-level="ok" title="Estimated session cost">~$0.00</span>
+          <button id="gev-voice-tier" class="gev-voice-tier-btn" type="button" aria-pressed="false" title="Palier du modèle vocal — s’applique à la prochaine session">STD</button>
+          <span id="gev-voice-cost-value" class="gev-voice-cost-value" data-level="ok" title="Coût estimé de la session">~$0.00</span>
         </div>
       </div>
-      <button id="gev-voice-button" type="button" aria-label="Voice control — activate to toggle voice; hold Space to speak" aria-describedby="gev-voice-help">
+      <button id="gev-voice-button" type="button" aria-label="Contrôle vocal — activer pour basculer la voix ; maintenir Espace pour parler" aria-describedby="gev-voice-help">
         <span class="gev-mic-orbit"><img src="/mic.svg" alt="" /></span>
         <span class="gev-mic-label">ON/OFF</span>
       </button>
@@ -2691,19 +2691,19 @@ function createVoiceControl({ reset = false } = {}) {
         ${Array.from({ length: 15 }, (_, index) => `<span style="--bar:${index}"></span>`).join('')}
       </div>
       <div class="gev-voice-readout">
-        <div id="gev-voice-detail">VOICE STANDBY</div>
+        <div id="gev-voice-detail">VOIX EN VEILLE</div>
       </div>
       <div id="gev-voice-help" class="gev-voice-help-tray" role="tooltip">
-        <span class="gev-voice-help-kicker">VOICE CONTROL</span>
-        <span class="gev-voice-help-detail">Hold Space to speak · tap Space to activate focused controls</span>
+        <span class="gev-voice-help-kicker">CONTRÔLE VOCAL</span>
+        <span class="gev-voice-help-detail">Maintenir Espace pour parler · appuyer sur Espace pour activer les contrôles en focus</span>
       </div>
       <div class="gev-voice-error-tray" role="alert" aria-live="assertive">
         <div class="gev-voice-error-header">
-          <span>VOICE SYSTEM ERROR</span>
-          <button class="gev-voice-error-dismiss" type="button">DISMISS</button>
+          <span>ERREUR DU SYSTÈME VOCAL</span>
+          <button class="gev-voice-error-dismiss" type="button">IGNORER</button>
         </div>
         <div id="gev-voice-error-detail"></div>
-        <div class="gev-voice-error-hint">Check microphone permission and network access, then try again.</div>
+        <div class="gev-voice-error-hint">Vérifiez l’autorisation du microphone et l’accès réseau, puis réessayez.</div>
       </div>
     `;
     const commandDock = document.getElementById('command-dock');
