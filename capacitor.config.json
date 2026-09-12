@@ -1,0 +1,12 @@
+{
+  "appId": "com.haseosama.godseyeview",
+  "appName": "L'Œil de Dieu",
+  "webDir": "dist",
+  "server": {
+    "url": "http://192.168.1.17:4173",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

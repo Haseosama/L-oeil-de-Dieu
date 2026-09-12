@@ -51,6 +51,10 @@
     "satellite.js": "^6.0.2"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2",
     "puppeteer": "^25.10.0",
     "sharp": "^0.35.4",
     "vite": "^6.0.0",
