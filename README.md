@@ -1,3 +1,5 @@
+> **L'Œil de Dieu — Android packaging fork.** This fork of [bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) adds an Android app wrapper (Capacitor) around the same web app — see [`android/`](android) and [`capacitor.config.json`](capacitor.config.json). The web app and its setup instructions below are unchanged; run `npm run dev -- --host 0.0.0.0 --port 4173` so the Android app can reach it over your LAN, then `cd android && ./gradlew assembleDebug` to build the APK.
+
 <div align="center">
 
 # 🌐 God's Eye View
