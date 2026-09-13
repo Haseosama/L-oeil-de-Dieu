@@ -50,9 +50,18 @@ export function flyToPreset(viewer, presetName, duration = 3.0) {
  * Set camera to Austin on load with a cinematic fly-in.
  */
 export function flyToAustin(viewer) {
+  flyToCoordinates(viewer, -97.7431, 30.2672);
+}
+
+/**
+ * Cinematic startup fly-in to an arbitrary point (same two-stage shape as
+ * flyToAustin: snap to a high overhead view, then ease down into a close
+ * oblique angle) — used for the user's own geolocated position on launch.
+ */
+export function flyToCoordinates(viewer, longitude, latitude) {
   // Start from a high altitude, then fly down
   viewer.camera.setView({
-    destination: Cesium.Cartesian3.fromDegrees(-97.7431, 30.2672, 25000),
+    destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 25000),
     orientation: {
       heading: Cesium.Math.toRadians(0),
       pitch: Cesium.Math.toRadians(-90),
@@ -63,7 +72,7 @@ export function flyToAustin(viewer) {
   // Cinematic fly-in after a brief pause
   setTimeout(() => {
     viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(-97.7431, 30.2672, 600),
+      destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 600),
       orientation: {
         heading: Cesium.Math.toRadians(15),
         pitch: Cesium.Math.toRadians(-30),

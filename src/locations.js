@@ -348,7 +348,7 @@ export const CANCELLED_SEARCH = Object.freeze({ cancelled: true });
  */
 export async function searchAndFlyTo(viewer, query, options = {}) {
   const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env.GOOGLE_MAPS_API_KEY;
-  if (!apiKey) throw new Error('No Google Maps API key available for geocoding');
+  if (!apiKey) return keylessSearchAndFlyTo(viewer, query, options);
 
   const beforeFly = typeof options.beforeFly === 'function' ? options.beforeFly : null;
   const mayFly = () => beforeFly === null || beforeFly() !== false;
@@ -475,6 +475,79 @@ export async function searchAndFlyTo(viewer, query, options = {}) {
       : (options.forceClose ? navigationMode.replace('-overview', '-close') : navigationMode),
     rangeM: Math.round(flight.range),
   };
+}
+
+/**
+ * Keyless fallback geocoder (OpenStreetMap Nominatim), used when no Google Maps
+ * key is configured. Coarser than the Google path above — no building-footprint
+ * framing, no region-swath or off-centre sanity gates — but gets the camera to
+ * the right place using only the result's bounding-box span to pick overview vs.
+ * close framing.
+ */
+async function keylessSearchAndFlyTo(viewer, query, options = {}) {
+  const beforeFly = typeof options.beforeFly === 'function' ? options.beforeFly : null;
+  const mayFly = () => beforeFly === null || beforeFly() !== false;
+
+  const params = new URLSearchParams({ format: 'jsonv2', q: query, limit: '1' });
+  const bias = viewportBias(viewer);
+  if (bias) {
+    // viewportBias returns Google's "south,west|north,east"; Nominatim's viewbox
+    // wants "west,north,east,south" — a bias, not a hard restriction (bounded=0).
+    const [sw, ne] = bias.split('|');
+    const [swLat, swLng] = sw.split(',');
+    const [neLat, neLng] = ne.split(',');
+    params.set('viewbox', `${swLng},${neLat},${neLng},${swLat}`);
+    params.set('bounded', '0');
+  }
+  let results;
+  try {
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+      headers: { Accept: 'application/json' },
+    });
+    results = await response.json();
+  } catch (error) {
+    throw new Error(`Keyless geocoding failed: ${error?.message || error}`);
+  }
+  const result = Array.isArray(results) ? results[0] : null;
+  const lat = Number(result?.lat);
+  const lng = Number(result?.lon);
+  if (!result || !Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const label = result.display_name || query;
+  const duration = finitePositive(options.duration) || 3.0;
+
+  const box = Array.isArray(result.boundingbox) ? result.boundingbox.map(Number) : null;
+  const viewport = box?.length === 4 && box.every(Number.isFinite)
+    ? { southwest: { lat: box[0], lng: box[2] }, northeast: { lat: box[1], lng: box[3] } }
+    : null;
+  const metrics = viewport ? viewportMetrics(viewport) : null;
+  const isAreaLike = metrics && metrics.spanKm > 2 && metrics.spanKm < REGION_SWATH_SPAN_KM;
+
+  if (!options.forceClose && !finitePositive(options.range) && isAreaLike) {
+    const flight = flyToViewportBounds(viewer, viewport, {
+      duration,
+      navigationMode: 'city-overview',
+      beforeFly: mayFly,
+      onStart: options.onStart,
+      onComplete: options.onComplete,
+      onCancel: options.onCancel,
+    });
+    if (flight === CANCELLED_SEARCH) return CANCELLED_SEARCH;
+    if (flight) return { label, navigationMode: 'city-overview', rangeM: null };
+  }
+
+  if (!mayFly()) return CANCELLED_SEARCH;
+  const range = finitePositive(options.range) || 500;
+  const flight = flyToLandmark(viewer, lat, lng, {
+    range,
+    pitch: -30,
+    heading: 30,
+    buildingHeight: 30,
+    duration,
+    onStart: options.onStart,
+    onComplete: options.onComplete,
+    onCancel: options.onCancel,
+  });
+  return { label, navigationMode: 'precise-place', rangeM: Math.round(flight.range) };
 }
 
 /** Places {low,high} viewport → the geocode {southwest,northeast} bounds shape
